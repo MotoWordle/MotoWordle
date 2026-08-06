@@ -1,505 +1,911 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
+<!DOCTYPE html>
+
+<html lang="en">
+
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <meta http-equiv="Content-Style-Type" content="text/css">
-  <title></title>
-  <meta name="Generator" content="Cocoa HTML Writer">
-  <meta name="CocoaVersion" content="2575.7">
-  <style type="text/css">
-    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Courier; -webkit-text-stroke: #000000}
-    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Courier; -webkit-text-stroke: #000000; min-height: 16.0px}
-    p.p3 {margin: 0.0px 0.0px 0.0px 0.0px; font: 20.0px 'Helvetica Neue'; -webkit-text-stroke: #000000}
-    p.p4 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px 'Helvetica Neue'; -webkit-text-stroke: #000000; min-height: 15.0px}
-    p.p5 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px 'Helvetica Neue'; -webkit-text-stroke: #000000}
-    span.s1 {font-kerning: none}
-    span.s2 {font: 13.0px 'Apple Color Emoji'; font-kerning: none}
-    span.s3 {font: 13.0px 'Lucida Grande'; font-kerning: none}
-    span.s4 {font: 13.0px 'Zapf Dingbats'; font-kerning: none}
+
+  <meta charset="UTF-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>MotoWordle – Test Mode</title>
+
+  <style>
+
+    body {
+
+      font-family: system-ui, -apple-system, sans-serif;
+
+      text-align: center;
+
+      background: #0f0f0f;
+
+      color: #eee;
+
+      margin: 0;
+
+      padding: 20px;
+
+      line-height: 1.4;
+
+    }
+
+    h1 { margin-bottom: 0.2em; }
+
+    
+
+    #test-controls {
+
+      background: #1a1a1a;
+
+      padding: 15px;
+
+      border-radius: 10px;
+
+      margin-bottom: 20px;
+
+      border: 1px solid #333;
+
+    }
+
+    
+
+    #image-container {
+
+      width: 100%;
+
+      max-width: 800px;
+
+      height: 420px;
+
+      margin: 20px auto;
+
+      overflow: hidden;
+
+      border: 4px solid #333;
+
+      border-radius: 12px;
+
+      background: #111;
+
+    }
+
+    
+
+    #image {
+
+      width: 100%;
+
+      height: 100%;
+
+      object-fit: cover;
+
+      transition: transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+
+    }
+
+    
+
+    .controls { margin: 15px 0; }
+
+    
+
+    .field-group {
+
+      display: inline-block;
+
+      margin: 0 12px;
+
+      vertical-align: top;
+
+    }
+
+    
+
+    select, input, button {
+
+      padding: 10px 12px;
+
+      margin: 5px;
+
+      font-size: 16px;
+
+      border-radius: 6px;
+
+      border: 1px solid #444;
+
+      background: #222;
+
+      color: #eee;
+
+    }
+
+    
+
+    button {
+
+      background: #1a6b3a;
+
+      border: none;
+
+      cursor: pointer;
+
+      font-weight: 600;
+
+    }
+
+    button:hover { background: #218c4e; }
+
+    button:disabled { background: #444; cursor: not-allowed; }
+
+    
+
+    .feedback-icon {
+
+      display: block;
+
+      font-size: 22px;
+
+      font-weight: bold;
+
+      height: 28px;
+
+      margin-top: 4px;
+
+    }
+
+    
+
+    .correct { color: #4ade80; }
+
+    .wrong { color: #f87171; }
+
+    
+
+    #guessHistory {
+
+      margin: 25px auto;
+
+      max-width: 520px;
+
+      text-align: left;
+
+      background: #1a1a1a;
+
+      padding: 15px 20px;
+
+      border-radius: 10px;
+
+      border: 1px solid #333;
+
+    }
+
+    
+
+    #guessHistory h3 {
+
+      margin-top: 0;
+
+      text-align: center;
+
+    }
+
+    
+
+    .guess-item {
+
+      padding: 6px 0;
+
+      border-bottom: 1px solid #333;
+
+      font-size: 15px;
+
+    }
+
+    
+
+    .guess-item:last-child {
+
+      border-bottom: none;
+
+    }
+
+    
+
+    .info { margin: 10px 0; font-size: 1.1em; }
+
+    #scoreDisplay { font-size: 1.3em; color: #ffd700; margin: 12px 0; }
+
+    #message { min-height: 1.5em; margin: 10px 0; font-weight: 500; }
+
+    .success { color: #4ade80; }
+
+    .fail { color: #f87171; }
+
+    #shareBtn { background: #2563eb; display: none; }
+
+    #attribution {
+
+      font-size: 0.85em;
+
+      color: #888;
+
+      margin-top: 8px;
+
+    }
+
   </style>
+
 </head>
+
 <body>
-<p class="p1"><span class="s1">Content-Type: text/html</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p3"><span class="s1"><b>Test mode feedback</b><b></b></span></p>
-<p class="p4"><span class="s1"></span><br></p>
-<p class="p5"><span class="s1">&lt;!DOCTYPE html&gt;</span></p>
-<p class="p5"><span class="s1">&lt;html lang="en"&gt;</span></p>
-<p class="p5"><span class="s1">&lt;head&gt;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">  </span>&lt;meta charset="UTF-8"&gt;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">  </span>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">  </span>&lt;title&gt;MotoWordle – Test Mode&lt;/title&gt;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">  </span>&lt;style&gt;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>body {</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>font-family: system-ui, -apple-system, sans-serif;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>text-align: center;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>background: #0f0f0f;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>color: #eee;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>margin: 0;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>padding: 20px;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>line-height: 1.4;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>h1 { margin-bottom: 0.2em; }</span></p>
-<p class="p4"><span class="s1"><span class="Apple-converted-space">    </span></span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>#test-controls {</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>background: #1a1a1a;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>padding: 15px;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>border-radius: 10px;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>margin-bottom: 20px;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>border: 1px solid #333;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p4"><span class="s1"><span class="Apple-converted-space">    </span></span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>#image-container {</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>width: 100%;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>max-width: 800px;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>height: 420px;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>margin: 20px auto;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>overflow: hidden;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>border: 4px solid #333;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>border-radius: 12px;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>background: #111;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p4"><span class="s1"><span class="Apple-converted-space">    </span></span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>#image {</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>width: 100%;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>height: 100%;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>object-fit: cover;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>transition: transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p4"><span class="s1"><span class="Apple-converted-space">    </span></span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>.controls { margin: 15px 0; }</span></p>
-<p class="p4"><span class="s1"><span class="Apple-converted-space">    </span></span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>.field-group {</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>display: inline-block;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>margin: 0 12px;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>vertical-align: top;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p4"><span class="s1"><span class="Apple-converted-space">    </span></span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>select, input, button {</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>padding: 10px 12px;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>margin: 5px;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>font-size: 16px;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>border-radius: 6px;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>border: 1px solid #444;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>background: #222;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>color: #eee;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p4"><span class="s1"><span class="Apple-converted-space">    </span></span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>button {</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>background: #1a6b3a;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>border: none;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>cursor: pointer;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>font-weight: 600;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>button:hover { background: #218c4e; }</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>button:disabled { background: #444; cursor: not-allowed; }</span></p>
-<p class="p4"><span class="s1"><span class="Apple-converted-space">    </span></span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>.feedback-icon {</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>display: block;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>font-size: 22px;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>font-weight: bold;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>height: 28px;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>margin-top: 4px;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p4"><span class="s1"><span class="Apple-converted-space">    </span></span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>.correct { color: #4ade80; }</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>.wrong { color: #f87171; }</span></p>
-<p class="p4"><span class="s1"><span class="Apple-converted-space">    </span></span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>#guessHistory {</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>margin: 25px auto;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>max-width: 520px;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>text-align: left;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>background: #1a1a1a;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>padding: 15px 20px;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>border-radius: 10px;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>border: 1px solid #333;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p4"><span class="s1"><span class="Apple-converted-space">    </span></span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>#guessHistory h3 {</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>margin-top: 0;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>text-align: center;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p4"><span class="s1"><span class="Apple-converted-space">    </span></span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>.guess-item {</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>padding: 6px 0;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>border-bottom: 1px solid #333;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>font-size: 15px;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p4"><span class="s1"><span class="Apple-converted-space">    </span></span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>.guess-item:last-child {</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>border-bottom: none;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p4"><span class="s1"><span class="Apple-converted-space">    </span></span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>.info { margin: 10px 0; font-size: 1.1em; }</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>#scoreDisplay { font-size: 1.3em; color: #ffd700; margin: 12px 0; }</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>#message { min-height: 1.5em; margin: 10px 0; font-weight: 500; }</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>.success { color: #4ade80; }</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>.fail { color: #f87171; }</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>#shareBtn { background: #2563eb; display: none; }</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>#attribution {</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>font-size: 0.85em;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>color: #888;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>margin-top: 8px;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">  </span>&lt;/style&gt;</span></p>
-<p class="p5"><span class="s1">&lt;/head&gt;</span></p>
-<p class="p5"><span class="s1">&lt;body&gt;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">  </span>&lt;h1&gt;</span><span class="s2">🏍️</span><span class="s1"> MotoWordle&lt;/h1&gt;</span></p>
-<p class="p4"><span class="s1"><span class="Apple-converted-space">  </span></span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">  </span>&lt;div id="test-controls"&gt;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>&lt;strong&gt;Test Mode:&lt;/strong&gt;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>&lt;select id="testBikeSelect"&gt;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>&lt;option value=""&gt;-- Select a bike to test --&lt;/option&gt;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/select&gt;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>&lt;button onclick="loadTestBike()"&gt;Load Selected Bike&lt;/button&gt;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</span></p>
-<p class="p4"><span class="s1"><span class="Apple-converted-space">  </span></span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">  </span>&lt;div class="info"&gt;</span><span class="s2">🔥</span><span class="s1"> Streak: &lt;span id="streak"&gt;0&lt;/span&gt;&lt;/div&gt;</span></p>
-<p class="p4"><span class="s1"><span class="Apple-converted-space">  </span></span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">  </span>&lt;div id="image-container"&gt;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>&lt;img id="image" src="" alt="Motorcycle"&gt;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">  </span>&lt;div id="attribution"&gt;&lt;/div&gt;</span></p>
-<p class="p4"><span class="s1"><span class="Apple-converted-space">  </span></span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">  </span>&lt;div class="controls"&gt;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div class="field-group"&gt;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>&lt;select id="make"&gt;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">        </span>&lt;option value=""&gt;Select Make&lt;/option&gt;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>&lt;/select&gt;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>&lt;span id="makeFeedback" class="feedback-icon"&gt;&lt;/span&gt;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</span></p>
-<p class="p4"><span class="s1"></span><br></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div class="field-group"&gt;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>&lt;select id="model" disabled&gt;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">        </span>&lt;option value=""&gt;Select Model&lt;/option&gt;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>&lt;/select&gt;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>&lt;span id="modelFeedback" class="feedback-icon"&gt;&lt;/span&gt;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</span></p>
-<p class="p4"><span class="s1"></span><br></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div class="field-group"&gt;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>&lt;input id="year" type="number" placeholder="Year" min="1900" max="2030"&gt;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>&lt;span id="yearFeedback" class="feedback-icon"&gt;&lt;/span&gt;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</span></p>
-<p class="p4"><span class="s1"><span class="Apple-converted-space">    </span></span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>&lt;br&gt;&lt;br&gt;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>&lt;button id="submitBtn" onclick="submitGuess()"&gt;Submit Guess&lt;/button&gt;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>&lt;button onclick="revealAnswer()"&gt;Give Up&lt;/button&gt;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>&lt;button id="shareBtn" onclick="shareResults()"&gt;Share Results&lt;/button&gt;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</span></p>
-<p class="p4"><span class="s1"><span class="Apple-converted-space">  </span></span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">  </span>&lt;div id="scoreDisplay"&gt;Score: 0 / 100&lt;/div&gt;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">  </span>&lt;div class="info"&gt;Tries left: &lt;span id="tries"&gt;5&lt;/span&gt;&lt;/div&gt;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">  </span>&lt;div id="message"&gt;&lt;/div&gt;</span></p>
-<p class="p4"><span class="s1"></span><br></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">  </span>&lt;div id="guessHistory"&gt;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>&lt;h3&gt;Guess History&lt;/h3&gt;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div id="historyList"&gt;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>&lt;div class="guess-item"&gt;No guesses yet&lt;/div&gt;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</span></p>
-<p class="p4"><span class="s1"></span><br></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">  </span>&lt;script&gt;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>const bikes = [</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>// BMW</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>{ id: 1, year: 1923, make: "BMW", model: "R32", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/BMW/1923%20BMW%20R32.jpg", attribution: "" },</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>{ id: 2, year: 2002, make: "BMW", model: "R1150GS", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/BMW/2002%20BMW%20R1150GS.jpg", attribution: "" },</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>{ id: 3, year: 2009, make: "BMW", model: "S1000RR", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/BMW/2009%20BMW%20S1000RR.jpg", attribution: "" },</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>{ id: 4, year: 2001, make: "BMW", model: "C1", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/BMW/2001%20BMW%20C1.jpg", attribution: "" },</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>{ id: 5, year: 1975, make: "BMW", model: "R75/6", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/BMW/1975%20BMW%20R75_6.JPG", attribution: "" },</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>{ id: 6, year: 2021, make: "BMW", model: "F850GS", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/BMW/2021%20BMW%20F850GS.jpg", attribution: "" },</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>{ id: 7, year: 2022, make: "BMW", model: "R nineT", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/BMW/2022%20BMW%20R%20NineT.jpg", attribution: "" },</span></p>
-<p class="p4"><span class="s1"></span><br></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>// Harley-Davidson</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>{ id: 8, year: 1926, make: "Harley-Davidson", model: "Model B", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/Harley-Davidson/1926%20Harley-Davidson%20Model%20B.jpg", attribution: "" },</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>{ id: 9, year: 1944, make: "Harley-Davidson", model: "Model U", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/Harley-Davidson/1944%20Harley-Davidson%20Model%20U.jpg", attribution: "" },</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>{ id: 10, year: 1973, make: "Harley-Davidson", model: "Electra Glide", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/Harley-Davidson/1973%20Harley-Davidson%20Electra%20Glide.jpg", attribution: "Vauxford" },</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>{ id: 11, year: 2022, make: "Harley-Davidson", model: "Pan America", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/Harley-Davidson/2022%20Harley-Davidson%20Pan%20America.jpg", attribution: "Frank Schwichtenberg" },</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>{ id: 12, year: 2005, make: "Harley-Davidson", model: "Fat Boy", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/Harley-Davidson/2005%20Harley-Davidson%20Fat%20Boy.jpg", attribution: "Bob Adams" },</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>{ id: 13, year: 2002, make: "Harley-Davidson", model: "V-Rod", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/Harley-Davidson/2002%20Harley-Davidson%20V-Rod.jpg", attribution: "" },</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>{ id: 14, year: 2023, make: "Harley-Davidson", model: "Road Glide Special", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/Harley-Davidson/2023%20Harley-Davidson%20Road%20Glide%20Special.jpg", attribution: "" },</span></p>
-<p class="p4"><span class="s1"></span><br></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>// Honda</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>{ id: 15, year: 1958, make: "Honda", model: "Super Cub", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/Honda/1958%20Honda%20Super%20Cub.jpg", attribution: "Mj-bird" },</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>{ id: 16, year: 1969, make: "Honda", model: "CB750", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/Honda/1969%20Honda%20CB750.JPG", attribution: "Slarty-bart-farst" },</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>{ id: 17, year: 1974, make: "Honda", model: "Gold Wing", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/Honda/1974%20Honda%20Gold%20Wing.jpg", attribution: "Ronald Saunders" },</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>{ id: 18, year: 1988, make: "Honda", model: "RC30", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/Honda/1988%20Honda%20VFR750R%20RC30.JPG", attribution: "Rainmaker47" },</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>{ id: 19, year: 1995, make: "Honda", model: "RC45", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/Honda/1995%20Honda%20RVF750R%20RC45.jpg", attribution: "Calreyn88" },</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>{ id: 20, year: 1992, make: "Honda", model: "NR750", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/Honda/1992%20Honda%20NR750.jpg", attribution: "Mike Schinkel" },</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>{ id: 21, year: 1978, make: "Honda", model: "CBX1000", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/Honda/1978%20Honda%20CBX1000.jpeg", attribution: "Rene Kientopp" },</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>{ id: 22, year: 2006, make: "Honda", model: "CBR1000RR", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/Honda/2006%20Honda%20CBR1000RR%20Fireblade.jpg", attribution: "Sierra Odonohue" },</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>{ id: 23, year: 2025, make: "Honda", model: "Africa Twin", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/Honda/2025%20Honda%20Africa%20Twin.jpg", attribution: "AVMOTO" },</span></p>
-<p class="p4"><span class="s1"></span><br></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>// Ducati</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>{ id: 24, year: 1973, make: "Ducati", model: "750 Sport", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/Ducati/1973%20Ducati%20750%20Sport.jpg", attribution: "Craig Howell" },</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>{ id: 25, year: 1990, make: "Ducati", model: "851", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/Ducati/1990%20Ducati%20851.jpg", attribution: "Calreyn88" },</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>{ id: 26, year: 1997, make: "Ducati", model: "916", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/Ducati/1997%20Ducati%20916%20SPS.jpg", attribution: "ScuderiaAssindia" },</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>{ id: 27, year: 2003, make: "Ducati", model: "999", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/Ducati/2003%20Ducati%20999.jpg", attribution: "Ligabo" },</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>{ id: 28, year: 2008, make: "Ducati", model: "Desmosedici RR", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/Ducati/2008%20Ducati%20Desmosedici%20RR.jpg", attribution: "Pierrecol" },</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>{ id: 29, year: 2013, make: "Ducati", model: "Diavel", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/Ducati/2013%20Ducati%20Diavel.jpg", attribution: "Shelby Asistio" },</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>{ id: 30, year: 2015, make: "Ducati", model: "Scrambler", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/Ducati/2015%20Ducati%20Scrambler.jpg", attribution: "HansFritzvonUmlauts" },</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>{ id: 31, year: 2018, make: "Ducati", model: "Panigale V4", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/Ducati/2018%20Ducati%20Panigale%20V4.jpeg", attribution: "Alessio Moscetti" },</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>{ id: 32, year: 2025, make: "Ducati", model: "Multistrada V4", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/Ducati/2025%20Ducati%20Multistrada%20V4.jpg", attribution: "Oq10pass" }</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>];</span></p>
-<p class="p4"><span class="s1"></span><br></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>let dailyBike = bikes[0];</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>let tries = 5;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>let solved = false;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>let finalScore = 0;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>let guessesUsed = 0;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>let guessHistory = [];</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>let streak = parseInt(localStorage.getItem('motowordleStreak') || '0');</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>document.getElementById('streak').textContent = streak;</span></p>
-<p class="p4"><span class="s1"></span><br></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>const testSelect = document.getElementById('testBikeSelect');</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>bikes.forEach(bike =&gt; {</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>const opt = document.createElement('option');</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>opt.value = bike.id;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>opt.textContent = `${bike.year} ${bike.make} ${bike.model}`;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>testSelect.appendChild(opt);</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>});</span></p>
-<p class="p4"><span class="s1"></span><br></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>function loadTestBike() {</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>const selectedId = parseInt(testSelect.value);</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>if (!selectedId) return alert("Please select a bike first");</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>dailyBike = bikes.find(b =&gt; b.id === selectedId);</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>resetGame();</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p4"><span class="s1"></span><br></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>function resetGame() {</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>tries = 5;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>solved = false;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>finalScore = 0;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>guessesUsed = 0;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>guessHistory = [];</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>document.getElementById('tries').textContent = tries;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>document.getElementById('scoreDisplay').textContent = "Score: 0 / 100";</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>document.getElementById('message').textContent = "";</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>document.getElementById('submitBtn').disabled = false;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>document.getElementById('shareBtn').style.display = "none";</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>document.getElementById('makeFeedback').textContent = "";</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>document.getElementById('modelFeedback').textContent = "";</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>document.getElementById('yearFeedback').textContent = "";</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>updateHistoryDisplay();</span></p>
-<p class="p4"><span class="s1"></span><br></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>const img = document.getElementById('image');</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>const origins = ["20% 30%", "80% 20%", "50% 20%", "30% 70%", "70% 80%", "25% 50%", "75% 50%", "50% 80%"];</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>const randomOrigin = origins[Math.floor(Math.random() * origins.length)];</span></p>
-<p class="p4"><span class="s1"><span class="Apple-converted-space">      </span></span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>img.src = dailyBike.image;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>img.style.transformOrigin = randomOrigin;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>img.style.transform = `scale(3.4)`;</span></p>
-<p class="p4"><span class="s1"></span><br></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>document.getElementById('attribution').textContent = dailyBike.attribution ? `Photo: ${dailyBike.attribution}` : "";</span></p>
-<p class="p4"><span class="s1"></span><br></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>document.getElementById('make').value = "";</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>document.getElementById('model').innerHTML = '&lt;option value=""&gt;Select Model&lt;/option&gt;';</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>document.getElementById('model').disabled = true;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>document.getElementById('year').value = "";</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p4"><span class="s1"></span><br></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>const zoomLevels = [3.4, 2.5, 1.9, 1.4, 1.0];</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>const img = document.getElementById('image');</span></p>
-<p class="p4"><span class="s1"></span><br></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>function updateZoom() {</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>const level = Math.min(5 - tries, zoomLevels.length - 1);</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>img.style.transform = `scale(${zoomLevels[level]})`;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p4"><span class="s1"></span><br></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>const makes = [...new Set(bikes.map(b =&gt; b.make))].sort();</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>const makeSelect = document.getElementById('make');</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>const modelSelect = document.getElementById('model');</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>const makeFeedback = document.getElementById('makeFeedback');</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>const modelFeedback = document.getElementById('modelFeedback');</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>const yearFeedback = document.getElementById('yearFeedback');</span></p>
-<p class="p4"><span class="s1"></span><br></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>makes.forEach(m =&gt; {</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>const opt = document.createElement('option');</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>opt.value = m;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>opt.textContent = m;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>makeSelect.appendChild(opt);</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>});</span></p>
-<p class="p4"><span class="s1"></span><br></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>makeSelect.addEventListener('change', function() {</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>const selectedMake = this.value;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>modelSelect.innerHTML = '&lt;option value=""&gt;Select Model&lt;/option&gt;';</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>makeFeedback.textContent = '';</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>modelFeedback.textContent = '';</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>yearFeedback.textContent = '';</span></p>
-<p class="p4"><span class="s1"></span><br></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>if (!selectedMake) {</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">        </span>modelSelect.disabled = true;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">        </span>return;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>}</span></p>
-<p class="p4"><span class="s1"></span><br></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>const models = [...new Set(bikes.filter(b =&gt; b.make === selectedMake).map(b =&gt; b.model))].sort();</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>models.forEach(model =&gt; {</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">        </span>const opt = document.createElement('option');</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">        </span>opt.value = model;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">        </span>opt.textContent = model;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">        </span>modelSelect.appendChild(opt);</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>});</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>modelSelect.disabled = false;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>});</span></p>
-<p class="p4"><span class="s1"></span><br></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>function updateHistoryDisplay() {</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>const list = document.getElementById('historyList');</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>if (guessHistory.length === 0) {</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">        </span>list.innerHTML = '&lt;div class="guess-item"&gt;No guesses yet&lt;/div&gt;';</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">        </span>return;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>}</span></p>
-<p class="p4"><span class="s1"></span><br></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>list.innerHTML = guessHistory.map((g, i) =&gt; {</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">        </span>const makeIcon = g.makeCorrect ? '&lt;span class="correct"&gt;</span><span class="s3">✓</span><span class="s1">&lt;/span&gt;' : '&lt;span class="wrong"&gt;</span><span class="s4">✗</span><span class="s1">&lt;/span&gt;';</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">        </span>const modelIcon = g.modelCorrect ? '&lt;span class="correct"&gt;</span><span class="s3">✓</span><span class="s1">&lt;/span&gt;' : '&lt;span class="wrong"&gt;</span><span class="s4">✗</span><span class="s1">&lt;/span&gt;';</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">        </span>const yearIcon = g.yearCorrect ? '&lt;span class="correct"&gt;</span><span class="s3">✓</span><span class="s1">&lt;/span&gt;' : '&lt;span class="wrong"&gt;</span><span class="s4">✗</span><span class="s1">&lt;/span&gt;';</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">        </span>return `&lt;div class="guess-item"&gt;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">          </span>&lt;strong&gt;${i + 1}.&lt;/strong&gt;<span class="Apple-converted-space"> </span></span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">          </span>${g.make} ${makeIcon} &amp;nbsp;<span class="Apple-converted-space"> </span></span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">          </span>${g.model} ${modelIcon} &amp;nbsp;<span class="Apple-converted-space"> </span></span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">          </span>${g.year || '—'} ${yearIcon}</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">        </span>&lt;/div&gt;`;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>}).join('');</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p4"><span class="s1"></span><br></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>function calculateYearPoints(guessYear, actualYear) {</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>if (isNaN(guessYear) || isNaN(actualYear)) return 0;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>const diff = Math.abs(guessYear - actualYear);</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>if (diff &gt; 20) return 0;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>return Math.max(0, 20 - diff);</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p4"><span class="s1"></span><br></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>function submitGuess() {</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>if (tries &lt;= 0 || solved) return;</span></p>
-<p class="p4"><span class="s1"></span><br></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>const guessMake = makeSelect.value;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>const guessModel = modelSelect.value;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>const guessYear = parseInt(document.getElementById('year').value);</span></p>
-<p class="p4"><span class="s1"></span><br></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>if (!guessMake || !guessModel) {</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">        </span>document.getElementById('message').textContent = "Please select both Make and Model.";</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">        </span>document.getElementById('message').className = "fail";</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">        </span>return;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>}</span></p>
-<p class="p4"><span class="s1"></span><br></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>const makeCorrect = guessMake === dailyBike.make;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>const modelCorrect = guessModel === dailyBike.model;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>const yearCorrect = guessYear === dailyBike.year;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>const yearPoints = calculateYearPoints(guessYear, dailyBike.year);</span></p>
-<p class="p4"><span class="s1"></span><br></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>// Feedback icons under each field</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>makeFeedback.textContent = makeCorrect ? '</span><span class="s3">✓</span><span class="s1">' : '</span><span class="s4">✗</span><span class="s1">';</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>makeFeedback.className = 'feedback-icon ' + (makeCorrect ? 'correct' : 'wrong');</span></p>
-<p class="p4"><span class="s1"></span><br></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>modelFeedback.textContent = modelCorrect ? '</span><span class="s3">✓</span><span class="s1">' : '</span><span class="s4">✗</span><span class="s1">';</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>modelFeedback.className = 'feedback-icon ' + (modelCorrect ? 'correct' : 'wrong');</span></p>
-<p class="p4"><span class="s1"></span><br></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>yearFeedback.textContent = yearCorrect ? '</span><span class="s3">✓</span><span class="s1">' : '</span><span class="s4">✗</span><span class="s1">';</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>yearFeedback.className = 'feedback-icon ' + (yearCorrect ? 'correct' : 'wrong');</span></p>
-<p class="p4"><span class="s1"></span><br></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>// Save to history</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>guessHistory.push({</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">        </span>make: guessMake,</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">        </span>model: guessModel,</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">        </span>year: guessYear || null,</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">        </span>makeCorrect,</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">        </span>modelCorrect,</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">        </span>yearCorrect</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>});</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>updateHistoryDisplay();</span></p>
-<p class="p4"><span class="s1"></span><br></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>const messageEl = document.getElementById('message');</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>const scoreEl = document.getElementById('scoreDisplay');</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>guessesUsed = 6 - tries;</span></p>
-<p class="p4"><span class="s1"></span><br></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>if (makeCorrect &amp;&amp; modelCorrect) {</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">        </span>finalScore = 80 + yearPoints;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">        </span>solved = true;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">        </span>document.getElementById('submitBtn').disabled = true;</span></p>
-<p class="p4"><span class="s1"><span class="Apple-converted-space">        </span></span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">        </span>img.style.transformOrigin = "center center";</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">        </span>img.style.transform = "scale(1)";</span></p>
-<p class="p4"><span class="s1"><span class="Apple-converted-space">        </span></span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">        </span>document.getElementById('shareBtn').style.display = "inline-block";</span></p>
-<p class="p4"><span class="s1"></span><br></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">        </span>let yearMsg = yearPoints === 20 ? " Perfect year!" :</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">                      </span>yearPoints &gt; 0 <span class="Apple-converted-space">  </span>? ` Year was ${20 - yearPoints} year(s) off.` :</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">                                         </span>" Year &gt;20 years off (0 pts).";</span></p>
-<p class="p4"><span class="s1"></span><br></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">        </span>messageEl.textContent = `Correct! ${dailyBike.year} ${dailyBike.make} ${dailyBike.model}.${yearMsg}`;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">        </span>messageEl.className = "success";</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">        </span>scoreEl.textContent = `Score: ${finalScore} / 100`;</span></p>
-<p class="p4"><span class="s1"></span><br></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">        </span>streak++;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">        </span>localStorage.setItem('motowordleStreak', streak);</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">        </span>document.getElementById('streak').textContent = streak;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>} else {</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">        </span>tries--;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">        </span>document.getElementById('tries').textContent = tries;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">        </span>updateZoom();</span></p>
-<p class="p4"><span class="s1"><span class="Apple-converted-space">        </span></span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">        </span>messageEl.textContent = "Incorrect. Zooming out…";</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">        </span>messageEl.className = "fail";</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">        </span>scoreEl.textContent = "Score: 0 / 100";</span></p>
-<p class="p4"><span class="s1"></span><br></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">        </span>if (tries === 0) {</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">          </span>img.style.transformOrigin = "center center";</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">          </span>img.style.transform = "scale(1)";</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">          </span>messageEl.textContent = `Out of tries. It was a ${dailyBike.year} ${dailyBike.make} ${dailyBike.model}.`;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">          </span>document.getElementById('submitBtn').disabled = true;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">          </span>document.getElementById('shareBtn').style.display = "inline-block";</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">          </span>streak = 0;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">          </span>localStorage.setItem('motowordleStreak', 0);</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">          </span>document.getElementById('streak').textContent = 0;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">          </span>finalScore = 0;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">          </span>guessesUsed = 5;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>}</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p4"><span class="s1"></span><br></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>function revealAnswer() {</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>if (solved) return;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>img.style.transformOrigin = "center center";</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>img.style.transform = "scale(1)";</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>document.getElementById('message').textContent = `Answer: ${dailyBike.year} ${dailyBike.make} ${dailyBike.model}`;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>document.getElementById('message').className = "fail";</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>document.getElementById('submitBtn').disabled = true;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>document.getElementById('tries').textContent = 0;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>document.getElementById('shareBtn').style.display = "inline-block";</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>streak = 0;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>localStorage.setItem('motowordleStreak', 0);</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>document.getElementById('streak').textContent = 0;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>finalScore = 0;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>guessesUsed = 5;</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p4"><span class="s1"></span><br></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>function shareResults() {</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>const today = new Date().toISOString().slice(0, 10);</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>const emojiLine = solved<span class="Apple-converted-space"> </span></span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">        </span>? "</span><span class="s2">🟩</span><span class="s1">".repeat(guessesUsed) + "</span><span class="s2">⬜</span><span class="s1">".repeat(5 - guessesUsed)</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">        </span>: "</span><span class="s2">🟥</span><span class="s1">".repeat(5);</span></p>
-<p class="p4"><span class="s1"></span><br></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>const text = `</span><span class="s2">🏍️</span><span class="s1"> MotoWordle ${today}</span></p>
-<p class="p5"><span class="s1">Score: ${finalScore}/100</span></p>
-<p class="p5"><span class="s1">${emojiLine}</span></p>
-<p class="p5"><span class="s1">Tries: ${guessesUsed}/5</span></p>
-<p class="p5"><span class="s2">🔥</span><span class="s1"> Streak: ${streak}`;</span></p>
-<p class="p4"><span class="s1"></span><br></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>navigator.clipboard.writeText(text).then(() =&gt; {</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">        </span>document.getElementById('message').textContent = "Results copied to clipboard!";</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">        </span>document.getElementById('message').className = "success";</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>}).catch(() =&gt; alert(text));</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p4"><span class="s1"></span><br></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>window.onload = () =&gt; {</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>testSelect.value = "1";</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>loadTestBike();</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>};</span></p>
-<p class="p4"><span class="s1"></span><br></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>document.addEventListener('keydown', (e) =&gt; {</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">      </span>if (e.key === 'Enter') submitGuess();</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">    </span>});</span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space">  </span>&lt;/script&gt;</span></p>
-<p class="p5"><span class="s1">&lt;/body&gt;</span></p>
-<p class="p5"><span class="s1">&lt;/html&gt;</span></p>
+
+  <h1>🏍️ MotoWordle</h1>
+
+  
+
+  <div id="test-controls">
+
+    <strong>Test Mode:</strong>
+
+    <select id="testBikeSelect">
+
+      <option value="">-- Select a bike to test --</option>
+
+    </select>
+
+    <button onclick="loadTestBike()">Load Selected Bike</button>
+
+  </div>
+
+  
+
+  <div class="info">🔥 Streak: <span id="streak">0</span></div>
+
+  
+
+  <div id="image-container">
+
+    <img id="image" src="" alt="Motorcycle">
+
+  </div>
+
+  <div id="attribution"></div>
+
+  
+
+  <div class="controls">
+
+    <div class="field-group">
+
+      <select id="make">
+
+        <option value="">Select Make</option>
+
+      </select>
+
+      <span id="makeFeedback" class="feedback-icon"></span>
+
+    </div>
+
+
+    <div class="field-group">
+
+      <select id="model" disabled>
+
+        <option value="">Select Model</option>
+
+      </select>
+
+      <span id="modelFeedback" class="feedback-icon"></span>
+
+    </div>
+
+
+    <div class="field-group">
+
+      <input id="year" type="number" placeholder="Year" min="1900" max="2030">
+
+      <span id="yearFeedback" class="feedback-icon"></span>
+
+    </div>
+
+    
+
+    <br><br>
+
+    <button id="submitBtn" onclick="submitGuess()">Submit Guess</button>
+
+    <button onclick="revealAnswer()">Give Up</button>
+
+    <button id="shareBtn" onclick="shareResults()">Share Results</button>
+
+  </div>
+
+  
+
+  <div id="scoreDisplay">Score: 0 / 100</div>
+
+  <div class="info">Tries left: <span id="tries">5</span></div>
+
+  <div id="message"></div>
+
+
+  <div id="guessHistory">
+
+    <h3>Guess History</h3>
+
+    <div id="historyList">
+
+      <div class="guess-item">No guesses yet</div>
+
+    </div>
+
+  </div>
+
+
+  <script>
+
+    const bikes = [
+
+      // BMW
+
+      { id: 1, year: 1923, make: "BMW", model: "R32", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/BMW/1923%20BMW%20R32.jpg", attribution: "" },
+
+      { id: 2, year: 2002, make: "BMW", model: "R1150GS", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/BMW/2002%20BMW%20R1150GS.jpg", attribution: "" },
+
+      { id: 3, year: 2009, make: "BMW", model: "S1000RR", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/BMW/2009%20BMW%20S1000RR.jpg", attribution: "" },
+
+      { id: 4, year: 2001, make: "BMW", model: "C1", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/BMW/2001%20BMW%20C1.jpg", attribution: "" },
+
+      { id: 5, year: 1975, make: "BMW", model: "R75/6", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/BMW/1975%20BMW%20R75_6.JPG", attribution: "" },
+
+      { id: 6, year: 2021, make: "BMW", model: "F850GS", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/BMW/2021%20BMW%20F850GS.jpg", attribution: "" },
+
+      { id: 7, year: 2022, make: "BMW", model: "R nineT", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/BMW/2022%20BMW%20R%20NineT.jpg", attribution: "" },
+
+
+      // Harley-Davidson
+
+      { id: 8, year: 1926, make: "Harley-Davidson", model: "Model B", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/Harley-Davidson/1926%20Harley-Davidson%20Model%20B.jpg", attribution: "" },
+
+      { id: 9, year: 1944, make: "Harley-Davidson", model: "Model U", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/Harley-Davidson/1944%20Harley-Davidson%20Model%20U.jpg", attribution: "" },
+
+      { id: 10, year: 1973, make: "Harley-Davidson", model: "Electra Glide", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/Harley-Davidson/1973%20Harley-Davidson%20Electra%20Glide.jpg", attribution: "Vauxford" },
+
+      { id: 11, year: 2022, make: "Harley-Davidson", model: "Pan America", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/Harley-Davidson/2022%20Harley-Davidson%20Pan%20America.jpg", attribution: "Frank Schwichtenberg" },
+
+      { id: 12, year: 2005, make: "Harley-Davidson", model: "Fat Boy", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/Harley-Davidson/2005%20Harley-Davidson%20Fat%20Boy.jpg", attribution: "Bob Adams" },
+
+      { id: 13, year: 2002, make: "Harley-Davidson", model: "V-Rod", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/Harley-Davidson/2002%20Harley-Davidson%20V-Rod.jpg", attribution: "" },
+
+      { id: 14, year: 2023, make: "Harley-Davidson", model: "Road Glide Special", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/Harley-Davidson/2023%20Harley-Davidson%20Road%20Glide%20Special.jpg", attribution: "" },
+
+
+      // Honda
+
+      { id: 15, year: 1958, make: "Honda", model: "Super Cub", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/Honda/1958%20Honda%20Super%20Cub.jpg", attribution: "Mj-bird" },
+
+      { id: 16, year: 1969, make: "Honda", model: "CB750", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/Honda/1969%20Honda%20CB750.JPG", attribution: "Slarty-bart-farst" },
+
+      { id: 17, year: 1974, make: "Honda", model: "Gold Wing", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/Honda/1974%20Honda%20Gold%20Wing.jpg", attribution: "Ronald Saunders" },
+
+      { id: 18, year: 1988, make: "Honda", model: "RC30", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/Honda/1988%20Honda%20VFR750R%20RC30.JPG", attribution: "Rainmaker47" },
+
+      { id: 19, year: 1995, make: "Honda", model: "RC45", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/Honda/1995%20Honda%20RVF750R%20RC45.jpg", attribution: "Calreyn88" },
+
+      { id: 20, year: 1992, make: "Honda", model: "NR750", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/Honda/1992%20Honda%20NR750.jpg", attribution: "Mike Schinkel" },
+
+      { id: 21, year: 1978, make: "Honda", model: "CBX1000", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/Honda/1978%20Honda%20CBX1000.jpeg", attribution: "Rene Kientopp" },
+
+      { id: 22, year: 2006, make: "Honda", model: "CBR1000RR", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/Honda/2006%20Honda%20CBR1000RR%20Fireblade.jpg", attribution: "Sierra Odonohue" },
+
+      { id: 23, year: 2025, make: "Honda", model: "Africa Twin", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/Honda/2025%20Honda%20Africa%20Twin.jpg", attribution: "AVMOTO" },
+
+
+      // Ducati
+
+      { id: 24, year: 1973, make: "Ducati", model: "750 Sport", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/Ducati/1973%20Ducati%20750%20Sport.jpg", attribution: "Craig Howell" },
+
+      { id: 25, year: 1990, make: "Ducati", model: "851", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/Ducati/1990%20Ducati%20851.jpg", attribution: "Calreyn88" },
+
+      { id: 26, year: 1997, make: "Ducati", model: "916", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/Ducati/1997%20Ducati%20916%20SPS.jpg", attribution: "ScuderiaAssindia" },
+
+      { id: 27, year: 2003, make: "Ducati", model: "999", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/Ducati/2003%20Ducati%20999.jpg", attribution: "Ligabo" },
+
+      { id: 28, year: 2008, make: "Ducati", model: "Desmosedici RR", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/Ducati/2008%20Ducati%20Desmosedici%20RR.jpg", attribution: "Pierrecol" },
+
+      { id: 29, year: 2013, make: "Ducati", model: "Diavel", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/Ducati/2013%20Ducati%20Diavel.jpg", attribution: "Shelby Asistio" },
+
+      { id: 30, year: 2015, make: "Ducati", model: "Scrambler", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/Ducati/2015%20Ducati%20Scrambler.jpg", attribution: "HansFritzvonUmlauts" },
+
+      { id: 31, year: 2018, make: "Ducati", model: "Panigale V4", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/Ducati/2018%20Ducati%20Panigale%20V4.jpeg", attribution: "Alessio Moscetti" },
+
+      { id: 32, year: 2025, make: "Ducati", model: "Multistrada V4", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/Ducati/2025%20Ducati%20Multistrada%20V4.jpg", attribution: "Oq10pass" }
+
+    ];
+
+
+    let dailyBike = bikes[0];
+
+    let tries = 5;
+
+    let solved = false;
+
+    let finalScore = 0;
+
+    let guessesUsed = 0;
+
+    let guessHistory = [];
+
+    let streak = parseInt(localStorage.getItem('motowordleStreak') || '0');
+
+    document.getElementById('streak').textContent = streak;
+
+
+    const testSelect = document.getElementById('testBikeSelect');
+
+    bikes.forEach(bike => {
+
+      const opt = document.createElement('option');
+
+      opt.value = bike.id;
+
+      opt.textContent = `${bike.year} ${bike.make} ${bike.model}`;
+
+      testSelect.appendChild(opt);
+
+    });
+
+
+    function loadTestBike() {
+
+      const selectedId = parseInt(testSelect.value);
+
+      if (!selectedId) return alert("Please select a bike first");
+
+      dailyBike = bikes.find(b => b.id === selectedId);
+
+      resetGame();
+
+    }
+
+
+    function resetGame() {
+
+      tries = 5;
+
+      solved = false;
+
+      finalScore = 0;
+
+      guessesUsed = 0;
+
+      guessHistory = [];
+
+      document.getElementById('tries').textContent = tries;
+
+      document.getElementById('scoreDisplay').textContent = "Score: 0 / 100";
+
+      document.getElementById('message').textContent = "";
+
+      document.getElementById('submitBtn').disabled = false;
+
+      document.getElementById('shareBtn').style.display = "none";
+
+      document.getElementById('makeFeedback').textContent = "";
+
+      document.getElementById('modelFeedback').textContent = "";
+
+      document.getElementById('yearFeedback').textContent = "";
+
+      updateHistoryDisplay();
+
+
+      const img = document.getElementById('image');
+
+      const origins = ["20% 30%", "80% 20%", "50% 20%", "30% 70%", "70% 80%", "25% 50%", "75% 50%", "50% 80%"];
+
+      const randomOrigin = origins[Math.floor(Math.random() * origins.length)];
+
+      
+
+      img.src = dailyBike.image;
+
+      img.style.transformOrigin = randomOrigin;
+
+      img.style.transform = `scale(3.4)`;
+
+
+      document.getElementById('attribution').textContent = dailyBike.attribution ? `Photo: ${dailyBike.attribution}` : "";
+
+
+      document.getElementById('make').value = "";
+
+      document.getElementById('model').innerHTML = '<option value="">Select Model</option>';
+
+      document.getElementById('model').disabled = true;
+
+      document.getElementById('year').value = "";
+
+    }
+
+
+    const zoomLevels = [3.4, 2.5, 1.9, 1.4, 1.0];
+
+    const img = document.getElementById('image');
+
+
+    function updateZoom() {
+
+      const level = Math.min(5 - tries, zoomLevels.length - 1);
+
+      img.style.transform = `scale(${zoomLevels[level]})`;
+
+    }
+
+
+    const makes = [...new Set(bikes.map(b => b.make))].sort();
+
+    const makeSelect = document.getElementById('make');
+
+    const modelSelect = document.getElementById('model');
+
+    const makeFeedback = document.getElementById('makeFeedback');
+
+    const modelFeedback = document.getElementById('modelFeedback');
+
+    const yearFeedback = document.getElementById('yearFeedback');
+
+
+    makes.forEach(m => {
+
+      const opt = document.createElement('option');
+
+      opt.value = m;
+
+      opt.textContent = m;
+
+      makeSelect.appendChild(opt);
+
+    });
+
+
+    makeSelect.addEventListener('change', function() {
+
+      const selectedMake = this.value;
+
+      modelSelect.innerHTML = '<option value="">Select Model</option>';
+
+      makeFeedback.textContent = '';
+
+      modelFeedback.textContent = '';
+
+      yearFeedback.textContent = '';
+
+
+      if (!selectedMake) {
+
+        modelSelect.disabled = true;
+
+        return;
+
+      }
+
+
+      const models = [...new Set(bikes.filter(b => b.make === selectedMake).map(b => b.model))].sort();
+
+      models.forEach(model => {
+
+        const opt = document.createElement('option');
+
+        opt.value = model;
+
+        opt.textContent = model;
+
+        modelSelect.appendChild(opt);
+
+      });
+
+      modelSelect.disabled = false;
+
+    });
+
+
+    function updateHistoryDisplay() {
+
+      const list = document.getElementById('historyList');
+
+      if (guessHistory.length === 0) {
+
+        list.innerHTML = '<div class="guess-item">No guesses yet</div>';
+
+        return;
+
+      }
+
+
+      list.innerHTML = guessHistory.map((g, i) => {
+
+        const makeIcon = g.makeCorrect ? '<span class="correct">✓</span>' : '<span class="wrong">✗</span>';
+
+        const modelIcon = g.modelCorrect ? '<span class="correct">✓</span>' : '<span class="wrong">✗</span>';
+
+        const yearIcon = g.yearCorrect ? '<span class="correct">✓</span>' : '<span class="wrong">✗</span>';
+
+        return `<div class="guess-item">
+
+          <strong>${i + 1}.</strong> 
+
+          ${g.make} ${makeIcon} &nbsp; 
+
+          ${g.model} ${modelIcon} &nbsp; 
+
+          ${g.year || '—'} ${yearIcon}
+
+        </div>`;
+
+      }).join('');
+
+    }
+
+
+    function calculateYearPoints(guessYear, actualYear) {
+
+      if (isNaN(guessYear) || isNaN(actualYear)) return 0;
+
+      const diff = Math.abs(guessYear - actualYear);
+
+      if (diff > 20) return 0;
+
+      return Math.max(0, 20 - diff);
+
+    }
+
+
+    function submitGuess() {
+
+      if (tries <= 0 || solved) return;
+
+
+      const guessMake = makeSelect.value;
+
+      const guessModel = modelSelect.value;
+
+      const guessYear = parseInt(document.getElementById('year').value);
+
+
+      if (!guessMake || !guessModel) {
+
+        document.getElementById('message').textContent = "Please select both Make and Model.";
+
+        document.getElementById('message').className = "fail";
+
+        return;
+
+      }
+
+
+      const makeCorrect = guessMake === dailyBike.make;
+
+      const modelCorrect = guessModel === dailyBike.model;
+
+      const yearCorrect = guessYear === dailyBike.year;
+
+      const yearPoints = calculateYearPoints(guessYear, dailyBike.year);
+
+
+      // Feedback icons under each field
+
+      makeFeedback.textContent = makeCorrect ? '✓' : '✗';
+
+      makeFeedback.className = 'feedback-icon ' + (makeCorrect ? 'correct' : 'wrong');
+
+
+      modelFeedback.textContent = modelCorrect ? '✓' : '✗';
+
+      modelFeedback.className = 'feedback-icon ' + (modelCorrect ? 'correct' : 'wrong');
+
+
+      yearFeedback.textContent = yearCorrect ? '✓' : '✗';
+
+      yearFeedback.className = 'feedback-icon ' + (yearCorrect ? 'correct' : 'wrong');
+
+
+      // Save to history
+
+      guessHistory.push({
+
+        make: guessMake,
+
+        model: guessModel,
+
+        year: guessYear || null,
+
+        makeCorrect,
+
+        modelCorrect,
+
+        yearCorrect
+
+      });
+
+      updateHistoryDisplay();
+
+
+      const messageEl = document.getElementById('message');
+
+      const scoreEl = document.getElementById('scoreDisplay');
+
+      guessesUsed = 6 - tries;
+
+
+      if (makeCorrect && modelCorrect) {
+
+        finalScore = 80 + yearPoints;
+
+        solved = true;
+
+        document.getElementById('submitBtn').disabled = true;
+
+        
+
+        img.style.transformOrigin = "center center";
+
+        img.style.transform = "scale(1)";
+
+        
+
+        document.getElementById('shareBtn').style.display = "inline-block";
+
+
+        let yearMsg = yearPoints === 20 ? " Perfect year!" :
+
+                      yearPoints > 0   ? ` Year was ${20 - yearPoints} year(s) off.` :
+
+                                         " Year >20 years off (0 pts).";
+
+
+        messageEl.textContent = `Correct! ${dailyBike.year} ${dailyBike.make} ${dailyBike.model}.${yearMsg}`;
+
+        messageEl.className = "success";
+
+        scoreEl.textContent = `Score: ${finalScore} / 100`;
+
+
+        streak++;
+
+        localStorage.setItem('motowordleStreak', streak);
+
+        document.getElementById('streak').textContent = streak;
+
+      } else {
+
+        tries--;
+
+        document.getElementById('tries').textContent = tries;
+
+        updateZoom();
+
+        
+
+        messageEl.textContent = "Incorrect. Zooming out…";
+
+        messageEl.className = "fail";
+
+        scoreEl.textContent = "Score: 0 / 100";
+
+
+        if (tries === 0) {
+
+          img.style.transformOrigin = "center center";
+
+          img.style.transform = "scale(1)";
+
+          messageEl.textContent = `Out of tries. It was a ${dailyBike.year} ${dailyBike.make} ${dailyBike.model}.`;
+
+          document.getElementById('submitBtn').disabled = true;
+
+          document.getElementById('shareBtn').style.display = "inline-block";
+
+          streak = 0;
+
+          localStorage.setItem('motowordleStreak', 0);
+
+          document.getElementById('streak').textContent = 0;
+
+          finalScore = 0;
+
+          guessesUsed = 5;
+
+        }
+
+      }
+
+    }
+
+
+    function revealAnswer() {
+
+      if (solved) return;
+
+      img.style.transformOrigin = "center center";
+
+      img.style.transform = "scale(1)";
+
+      document.getElementById('message').textContent = `Answer: ${dailyBike.year} ${dailyBike.make} ${dailyBike.model}`;
+
+      document.getElementById('message').className = "fail";
+
+      document.getElementById('submitBtn').disabled = true;
+
+      document.getElementById('tries').textContent = 0;
+
+      document.getElementById('shareBtn').style.display = "inline-block";
+
+      streak = 0;
+
+      localStorage.setItem('motowordleStreak', 0);
+
+      document.getElementById('streak').textContent = 0;
+
+      finalScore = 0;
+
+      guessesUsed = 5;
+
+    }
+
+
+    function shareResults() {
+
+      const today = new Date().toISOString().slice(0, 10);
+
+      const emojiLine = solved 
+
+        ? "🟩".repeat(guessesUsed) + "⬜".repeat(5 - guessesUsed)
+
+        : "🟥".repeat(5);
+
+
+      const text = `🏍️ MotoWordle ${today}
+
+Score: ${finalScore}/100
+
+${emojiLine}
+
+Tries: ${guessesUsed}/5
+
+🔥 Streak: ${streak}`;
+
+
+      navigator.clipboard.writeText(text).then(() => {
+
+        document.getElementById('message').textContent = "Results copied to clipboard!";
+
+        document.getElementById('message').className = "success";
+
+      }).catch(() => alert(text));
+
+    }
+
+
+    window.onload = () => {
+
+      testSelect.value = "1";
+
+      loadTestBike();
+
+    };
+
+
+    document.addEventListener('keydown', (e) => {
+
+      if (e.key === 'Enter') submitGuess();
+
+    });
+
+  </script>
+
 </body>
+
 </html>
