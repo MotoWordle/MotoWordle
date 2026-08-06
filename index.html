@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MotoWordle – Test Mode</title>
+  <title>MotoWordle</title>
   <style>
     body {
       font-family: system-ui, -apple-system, sans-serif;
@@ -15,14 +15,6 @@
       line-height: 1.4;
     }
     h1 { margin-bottom: 0.2em; }
-    
-    #test-controls {
-      background: #1a1a1a;
-      padding: 15px;
-      border-radius: 10px;
-      margin-bottom: 20px;
-      border: 1px solid #333;
-    }
     
     #image-container {
       width: 100%;
@@ -42,7 +34,7 @@
       transition: transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
     }
     
-    .controls { margin: 15px 0; }
+    .controls { margin: 15px 0 5px 0; }
     
     .field-group {
       display: inline-block;
@@ -81,22 +73,23 @@
     .wrong { color: #f87171; }
     
     #guessHistory {
-      margin: 25px auto;
-      max-width: 520px;
+      margin: 10px auto 25px auto;
+      max-width: 600px;
       text-align: left;
       background: #1a1a1a;
-      padding: 15px 20px;
+      padding: 12px 18px;
       border-radius: 10px;
       border: 1px solid #333;
     }
     
     #guessHistory h3 {
-      margin-top: 0;
+      margin: 0 0 10px 0;
       text-align: center;
+      font-size: 1.1em;
     }
     
     .guess-item {
-      padding: 6px 0;
+      padding: 7px 0;
       border-bottom: 1px solid #333;
       font-size: 15px;
     }
@@ -120,14 +113,7 @@
 </head>
 <body>
   <h1>🏍️ MotoWordle</h1>
-  
-  <div id="test-controls">
-    <strong>Test Mode:</strong>
-    <select id="testBikeSelect">
-      <option value="">-- Select a bike to test --</option>
-    </select>
-    <button onclick="loadTestBike()">Load Selected Bike</button>
-  </div>
+  <p>Daily Motorcycle Guessing Game</p>
   
   <div class="info">🔥 Streak: <span id="streak">0</span></div>
   
@@ -161,17 +147,17 @@
     <button onclick="revealAnswer()">Give Up</button>
     <button id="shareBtn" onclick="shareResults()">Share Results</button>
   </div>
-  
-  <div id="scoreDisplay">Score: 0 / 100</div>
-  <div class="info">Tries left: <span id="tries">5</span></div>
-  <div id="message"></div>
 
   <div id="guessHistory">
-    <h3>Guess History</h3>
+    <h3>Previous Guesses</h3>
     <div id="historyList">
       <div class="guess-item">No guesses yet</div>
     </div>
   </div>
+  
+  <div id="scoreDisplay">Score: 0 / 100</div>
+  <div class="info">Tries left: <span id="tries">5</span></div>
+  <div id="message"></div>
 
   <script>
     const bikes = [
@@ -216,7 +202,17 @@
       { id: 32, year: 2025, make: "Ducati", model: "Multistrada V4", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/Ducati/2025%20Ducati%20Multistrada%20V4.jpg", attribution: "Oq10pass" }
     ];
 
-    let dailyBike = bikes[0];
+    // Daily bike selection
+    function getDailyBike() {
+      const today = new Date().toISOString().slice(0, 10);
+      let hash = 0;
+      for (let i = 0; i < today.length; i++) {
+        hash = (hash * 31 + today.charCodeAt(i)) % bikes.length;
+      }
+      return bikes[Math.abs(hash)];
+    }
+
+    const dailyBike = getDailyBike();
     let tries = 5;
     let solved = false;
     let finalScore = 0;
@@ -225,61 +221,23 @@
     let streak = parseInt(localStorage.getItem('motowordleStreak') || '0');
     document.getElementById('streak').textContent = streak;
 
-    const testSelect = document.getElementById('testBikeSelect');
-    bikes.forEach(bike => {
-      const opt = document.createElement('option');
-      opt.value = bike.id;
-      opt.textContent = `${bike.year} ${bike.make} ${bike.model}`;
-      testSelect.appendChild(opt);
-    });
-
-    function loadTestBike() {
-      const selectedId = parseInt(testSelect.value);
-      if (!selectedId) return alert("Please select a bike first");
-      dailyBike = bikes.find(b => b.id === selectedId);
-      resetGame();
-    }
-
-    function resetGame() {
-      tries = 5;
-      solved = false;
-      finalScore = 0;
-      guessesUsed = 0;
-      guessHistory = [];
-      document.getElementById('tries').textContent = tries;
-      document.getElementById('scoreDisplay').textContent = "Score: 0 / 100";
-      document.getElementById('message').textContent = "";
-      document.getElementById('submitBtn').disabled = false;
-      document.getElementById('shareBtn').style.display = "none";
-      document.getElementById('makeFeedback').textContent = "";
-      document.getElementById('modelFeedback').textContent = "";
-      document.getElementById('yearFeedback').textContent = "";
-      updateHistoryDisplay();
-
-      const img = document.getElementById('image');
-      const origins = ["20% 30%", "80% 20%", "50% 20%", "30% 70%", "70% 80%", "25% 50%", "75% 50%", "50% 80%"];
-      const randomOrigin = origins[Math.floor(Math.random() * origins.length)];
-      
-      img.src = dailyBike.image;
-      img.style.transformOrigin = randomOrigin;
-      img.style.transform = `scale(3.4)`;
-
-      document.getElementById('attribution').textContent = dailyBike.attribution ? `Photo: ${dailyBike.attribution}` : "";
-
-      document.getElementById('make').value = "";
-      document.getElementById('model').innerHTML = '<option value="">Select Model</option>';
-      document.getElementById('model').disabled = true;
-      document.getElementById('year').value = "";
-    }
-
+    // Zoom system
     const zoomLevels = [3.4, 2.5, 1.9, 1.4, 1.0];
     const img = document.getElementById('image');
+    const origins = ["20% 30%", "80% 20%", "50% 20%", "30% 70%", "70% 80%", "25% 50%", "75% 50%", "50% 80%"];
+    const randomOrigin = origins[Math.floor(Math.random() * origins.length)];
+    
+    img.src = dailyBike.image;
+    img.style.transformOrigin = randomOrigin;
+    img.style.transform = `scale(${zoomLevels[0]})`;
+    document.getElementById('attribution').textContent = dailyBike.attribution ? `Photo: ${dailyBike.attribution}` : "";
 
     function updateZoom() {
       const level = Math.min(5 - tries, zoomLevels.length - 1);
       img.style.transform = `scale(${zoomLevels[level]})`;
     }
 
+    // Dropdowns
     const makes = [...new Set(bikes.map(b => b.make))].sort();
     const makeSelect = document.getElementById('make');
     const modelSelect = document.getElementById('model');
@@ -328,12 +286,19 @@
         const modelIcon = g.modelCorrect ? '<span class="correct">✓</span>' : '<span class="wrong">✗</span>';
         const yearIcon = g.yearCorrect ? '<span class="correct">✓</span>' : '<span class="wrong">✗</span>';
         return `<div class="guess-item">
-          <strong>${i + 1}.</strong> 
-          ${g.make} ${makeIcon} &nbsp; 
-          ${g.model} ${modelIcon} &nbsp; 
+          <strong>${i + 1}${getOrdinal(i+1)}:</strong> 
+          ${g.make} ${makeIcon} &nbsp;&nbsp; 
+          ${g.model} ${modelIcon} &nbsp;&nbsp; 
           ${g.year || '—'} ${yearIcon}
         </div>`;
       }).join('');
+    }
+
+    function getOrdinal(n) {
+      if (n === 1) return "st";
+      if (n === 2) return "nd";
+      if (n === 3) return "rd";
+      return "th";
     }
 
     function calculateYearPoints(guessYear, actualYear) {
@@ -361,7 +326,6 @@
       const yearCorrect = guessYear === dailyBike.year;
       const yearPoints = calculateYearPoints(guessYear, dailyBike.year);
 
-      // Feedback icons under each field
       makeFeedback.textContent = makeCorrect ? '✓' : '✗';
       makeFeedback.className = 'feedback-icon ' + (makeCorrect ? 'correct' : 'wrong');
 
@@ -371,7 +335,6 @@
       yearFeedback.textContent = yearCorrect ? '✓' : '✗';
       yearFeedback.className = 'feedback-icon ' + (yearCorrect ? 'correct' : 'wrong');
 
-      // Save to history
       guessHistory.push({
         make: guessMake,
         model: guessModel,
@@ -464,11 +427,6 @@ Tries: ${guessesUsed}/5
         document.getElementById('message').className = "success";
       }).catch(() => alert(text));
     }
-
-    window.onload = () => {
-      testSelect.value = "1";
-      loadTestBike();
-    };
 
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') submitGuess();
