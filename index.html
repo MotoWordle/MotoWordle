@@ -63,7 +63,7 @@
     
     #giveUpBtn {
       background: #ca8a04;
-      margin-top: 15px;
+      margin-top: 20px;
     }
     #giveUpBtn:hover {
       background: #eab308;
@@ -166,7 +166,6 @@
   <div class="info">Tries left: <span id="tries">5</span></div>
   <div id="message"></div>
 
-  <!-- Give Up button moved down and made yellow -->
   <button id="giveUpBtn" onclick="revealAnswer()">Give Up</button>
 
   <script>
@@ -224,7 +223,7 @@
     const dailyBike = getDailyBike();
     let tries = 5;
     let solved = false;
-    let makeModelLocked = false;   // new flag
+    let makeModelLocked = false;
     let finalScore = 0;
     let guessesUsed = 0;
     let guessHistory = [];
@@ -332,10 +331,10 @@
 
       const makeCorrect = makeModelLocked ? true : (guessMake === dailyBike.make);
       const modelCorrect = makeModelLocked ? true : (guessModel === dailyBike.model);
-      const yearCorrect = guessYear === dailyBike.year;
       const yearPoints = calculateYearPoints(guessYear, dailyBike.year);
+      const yearAcceptable = yearPoints > 0;
+      const yearExact = guessYear === dailyBike.year;
 
-      // Feedback
       if (!makeModelLocked) {
         makeFeedback.textContent = makeCorrect ? '✓' : '✗';
         makeFeedback.className = 'feedback-icon ' + (makeCorrect ? 'correct' : 'wrong');
@@ -344,17 +343,16 @@
         modelFeedback.className = 'feedback-icon ' + (modelCorrect ? 'correct' : 'wrong');
       }
 
-      yearFeedback.textContent = yearCorrect ? '✓' : '✗';
-      yearFeedback.className = 'feedback-icon ' + (yearCorrect ? 'correct' : 'wrong');
+      yearFeedback.textContent = yearAcceptable ? '✓' : '✗';
+      yearFeedback.className = 'feedback-icon ' + (yearAcceptable ? 'correct' : 'wrong');
 
-      // History
       guessHistory.push({
         make: makeModelLocked ? dailyBike.make : guessMake,
         model: makeModelLocked ? dailyBike.model : guessModel,
-        year: guessYear || null,
+        year: isNaN(guessYear) ? null : guessYear,
         makeCorrect,
         modelCorrect,
-        yearCorrect
+        yearCorrect: yearExact
       });
       updateHistoryDisplay();
 
@@ -362,18 +360,16 @@
       const scoreEl = document.getElementById('scoreDisplay');
       guessesUsed = 6 - tries;
 
-      // Case 1: Make + Model correct (first time)
+      // First time getting Make + Model correct
       if (makeCorrect && modelCorrect && !makeModelLocked) {
         makeModelLocked = true;
         makeSelect.disabled = true;
         modelSelect.disabled = true;
 
-        if (yearCorrect) {
-          // Fully correct
+        if (yearAcceptable) {
           finishGame(true, yearPoints);
         } else {
-          // Make+Model correct, year wrong → keep going for year
-          messageEl.textContent = "Make & Model correct! Keep guessing the year.";
+          messageEl.textContent = "Make & Model correct! Keep guessing the year (within 20 years).";
           messageEl.className = "success";
           scoreEl.textContent = `Score so far: 80 / 100`;
           tries--;
@@ -383,15 +379,15 @@
         return;
       }
 
-      // Case 2: Already locked (only guessing year now)
+      // Already locked – only guessing year
       if (makeModelLocked) {
-        if (yearCorrect) {
+        if (yearAcceptable) {
           finishGame(true, yearPoints);
         } else {
           tries--;
           document.getElementById('tries').textContent = tries;
           updateZoom();
-          messageEl.textContent = "Year incorrect. Try again!";
+          messageEl.textContent = "Year too far off. Try again (must be within 20 years).";
           messageEl.className = "fail";
 
           if (tries === 0) {
@@ -401,7 +397,7 @@
         return;
       }
 
-      // Case 3: Normal wrong make or model
+      // Wrong Make or Model
       tries--;
       document.getElementById('tries').textContent = tries;
       updateZoom();
@@ -458,8 +454,8 @@
 
     function shareResults() {
       const today = new Date().toISOString().slice(0, 10);
-      const emojiLine = solved && finalScore >= 80
-        ? "🟩".repeat(guessesUsed) + "⬜".repeat(5 - guessesUsed)
+      const emojiLine = (solved && finalScore >= 80)
+        ? "🟩".repeat(Math.min(guessesUsed, 5)) + "⬜".repeat(Math.max(0, 5 - guessesUsed))
         : "🟥".repeat(5);
 
       const text = `🏍️ MotoWordle ${today}
