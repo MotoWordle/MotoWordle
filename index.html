@@ -224,11 +224,11 @@
 
     const dailyBike = getDailyBike();
     
-    // Separate counters
-    let mainTries = 5;        // for finding Make + Model
-    let yearTries = 5;        // dedicated year chances
+    let mainTries = 5;
+    let yearTries = 5;
     let solved = false;
     let makeModelLocked = false;
+    let bestYearPoints = 0;          // tracks the best year score achieved
     let finalScore = 0;
     let guessHistory = [];
     let streak = parseInt(localStorage.getItem('motowordleStreak') || '0');
@@ -307,7 +307,7 @@
       list.innerHTML = guessHistory.map((g, i) => {
         const makeIcon = g.makeCorrect ? '<span class="correct">✓</span>' : '<span class="wrong">✗</span>';
         const modelIcon = g.modelCorrect ? '<span class="correct">✓</span>' : '<span class="wrong">✗</span>';
-        const yearIcon = g.yearCorrect ? '<span class="correct">✓</span>' : '<span class="wrong">✗</span>';
+        const yearIcon = g.yearExact ? '<span class="correct">✓</span>' : '<span class="wrong">✗</span>';
         return `<div class="guess-item">
           <strong>${i + 1}${getOrdinal(i+1)}:</strong> 
           ${g.make} ${makeIcon} &nbsp;&nbsp; 
@@ -349,8 +349,12 @@
       const makeCorrect = makeModelLocked ? true : (guessMake === dailyBike.make);
       const modelCorrect = makeModelLocked ? true : (guessModel === dailyBike.model);
       const yearPoints = calculateYearPoints(guessYear, dailyBike.year);
-      const yearAcceptable = yearPoints > 0;
       const yearExact = guessYear === dailyBike.year;
+
+      // Update best year points
+      if (yearPoints > bestYearPoints) {
+        bestYearPoints = yearPoints;
+      }
 
       // Feedback
       if (!makeModelLocked) {
@@ -361,8 +365,8 @@
         modelFeedback.className = 'feedback-icon ' + (modelCorrect ? 'correct' : 'wrong');
       }
 
-      yearFeedback.textContent = yearAcceptable ? '✓' : '✗';
-      yearFeedback.className = 'feedback-icon ' + (yearAcceptable ? 'correct' : 'wrong');
+      yearFeedback.textContent = yearExact ? '✓' : '✗';
+      yearFeedback.className = 'feedback-icon ' + (yearExact ? 'correct' : 'wrong');
 
       // History
       guessHistory.push({
@@ -371,7 +375,7 @@
         year: isNaN(guessYear) ? null : guessYear,
         makeCorrect,
         modelCorrect,
-        yearCorrect: yearExact
+        yearExact
       });
       updateHistoryDisplay();
 
@@ -384,14 +388,13 @@
         makeSelect.disabled = true;
         modelSelect.disabled = true;
 
-        // Give 5 dedicated year chances
         yearTries = 5;
         updateTriesDisplay();
 
-        if (yearAcceptable) {
-          finishGame(true, yearPoints);
+        if (yearExact) {
+          finishGame(true, 20);
         } else {
-          messageEl.textContent = "Make & Model correct! You now have 5 chances for the year.";
+          messageEl.textContent = "Make & Model correct! You have 5 chances to get the exact year.";
           messageEl.className = "success";
           scoreEl.textContent = "Score so far: 80 / 100";
         }
@@ -400,17 +403,27 @@
 
       // ===== Year guessing phase =====
       if (makeModelLocked) {
-        if (yearAcceptable) {
-          finishGame(true, yearPoints);
+        if (yearExact) {
+          // Exact year → end immediately with full points
+          finishGame(true, 20);
         } else {
           yearTries--;
           updateTriesDisplay();
           updateZoom();
-          messageEl.textContent = "Year too far off. Try again!";
-          messageEl.className = "fail";
+
+          if (yearPoints > 0) {
+            messageEl.textContent = `Close! (${yearPoints} year points so far). Keep trying for the exact year.`;
+            messageEl.className = "success";
+          } else {
+            messageEl.textContent = "Year too far off. Try again!";
+            messageEl.className = "fail";
+          }
+
+          scoreEl.textContent = `Score so far: 80 + ${bestYearPoints} = ${80 + bestYearPoints} / 100`;
 
           if (yearTries === 0) {
-            finishGame(false, 0);
+            // Used all 5 year attempts → finish with best score
+            finishGame(true, bestYearPoints);
           }
         }
         return;
@@ -444,8 +457,8 @@
       if (success) {
         finalScore = 80 + yearPoints;
         let yearMsg = yearPoints === 20 ? " Perfect year!" :
-                      yearPoints > 0   ? ` Year was ${20 - yearPoints} year(s) off.` :
-                                         " Year >20 years off (0 pts).";
+                      yearPoints > 0   ? ` Best year score: ${yearPoints} points.` :
+                                         " No year points.";
 
         messageEl.textContent = `Correct! ${dailyBike.year} ${dailyBike.make} ${dailyBike.model}.${yearMsg}`;
         messageEl.className = "success";
@@ -455,7 +468,7 @@
         localStorage.setItem('motowordleStreak', streak);
         document.getElementById('streak').textContent = streak;
       } else {
-        finalScore = makeModelLocked ? 80 : 0;
+        finalScore = makeModelLocked ? 80 + bestYearPoints : 0;
         messageEl.textContent = `Out of tries. It was a ${dailyBike.year} ${dailyBike.make} ${dailyBike.model}.`;
         messageEl.className = "fail";
         scoreEl.textContent = `Score: ${finalScore} / 100`;
@@ -483,7 +496,6 @@ Score: ${finalScore}/100
       }).catch(() => alert(text));
     }
 
-    // Initialize display
     updateTriesDisplay();
 
     document.addEventListener('keydown', (e) => {
