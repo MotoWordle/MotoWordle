@@ -144,13 +144,20 @@
       margin: 0;
     }
     #feedbackSection textarea {
-      min-height: 120px;
+      min-height: 110px;
       resize: vertical;
     }
     #feedbackSection button {
       width: 100%;
       margin-top: 15px;
       padding: 12px;
+    }
+    #captchaBox {
+      margin-top: 12px;
+      padding: 10px;
+      background: #111;
+      border-radius: 6px;
+      border: 1px solid #444;
     }
   </style>
 </head>
@@ -211,7 +218,7 @@
 
   <button id="giveUpBtn" onclick="revealAnswer()">Give Up</button>
 
-  <!-- Feedback / Request Form -->
+  <!-- Feedback Form -->
   <div id="feedbackSection">
     <h3>Feedback or Request</h3>
     <form id="feedbackForm" onsubmit="sendFeedback(event)">
@@ -223,6 +230,11 @@
 
       <label for="fbMessage">Message *</label>
       <textarea id="fbMessage" required placeholder="Write your message here..."></textarea>
+
+      <div id="captchaBox">
+        <label for="fbCaptcha">Security check: What is <span id="captchaQuestion"></span>? *</label>
+        <input type="text" id="fbCaptcha" required inputmode="numeric" placeholder="Answer" autocomplete="off">
+      </div>
 
       <button type="submit">Send Feedback</button>
     </form>
@@ -316,14 +328,13 @@
     function getDailyOrigin() {
       const dayNumber = getDayNumber();
       const rand = seededRandom(dayNumber + 55555);
-
       const x = 22 + Math.floor(rand() * 57);
       const y = 22 + Math.floor(rand() * 57);
-
       return `${x}% ${y}%`;
     }
 
     // ---------- Game state ----------
+    const today = getLocalDateString();
     const dailyBike = getDailyBike();
     const dailyOrigin = getDailyOrigin();
     
@@ -335,6 +346,9 @@
     let finalScore = 0;
     let guessHistory = [];
     let streak = parseInt(localStorage.getItem('motowordleStreak') || '0');
+    let lastPlayed = localStorage.getItem('motowordleLastPlayed') || '';
+    let alreadyPlayedToday = lastPlayed === today;
+
     document.getElementById('streak').textContent = streak;
 
     const zoomLevels = [3.4, 2.5, 1.9, 1.4, 1.0];
@@ -344,6 +358,19 @@
     img.style.transformOrigin = dailyOrigin;
     img.style.transform = `scale(${zoomLevels[0]})`;
     document.getElementById('attribution').textContent = dailyBike.attribution ? `Photo: ${dailyBike.attribution}` : "";
+
+    // Lock game if already completed today
+    if (alreadyPlayedToday) {
+      solved = true;
+      document.getElementById('submitBtn').disabled = true;
+      document.getElementById('giveUpBtn').disabled = true;
+      document.getElementById('shareBtn').style.display = "inline-block";
+      img.style.transformOrigin = "center center";
+      img.style.transform = "scale(1)";
+      document.getElementById('message').textContent = "You already completed today's MotoWordle!";
+      document.getElementById('message').className = "success";
+      document.getElementById('scoreDisplay').textContent = `Score: ${localStorage.getItem('motowordleLastScore') || 0} / 100`;
+    }
 
     function updateZoom() {
       const currentTries = makeModelLocked ? yearTries : mainTries;
@@ -377,7 +404,7 @@
     });
 
     makeSelect.addEventListener('change', function() {
-      if (makeModelLocked) return;
+      if (makeModelLocked || alreadyPlayedToday) return;
       const selectedMake = this.value;
       modelSelect.innerHTML = '<option value="">Select Model</option>';
       makeFeedback.textContent = '';
@@ -434,7 +461,7 @@
     }
 
     function submitGuess() {
-      if (solved) return;
+      if (solved || alreadyPlayedToday) return;
       if (!makeModelLocked && mainTries <= 0) return;
       if (makeModelLocked && yearTries <= 0) return;
 
@@ -453,14 +480,11 @@
       const yearPoints = calculateYearPoints(guessYear, dailyBike.year);
       const yearExact = guessYear === dailyBike.year;
 
-      if (yearPoints > bestYearPoints) {
-        bestYearPoints = yearPoints;
-      }
+      if (yearPoints > bestYearPoints) bestYearPoints = yearPoints;
 
       if (!makeModelLocked) {
         makeFeedback.textContent = makeCorrect ? '✓' : '✗';
         makeFeedback.className = 'feedback-icon ' + (makeCorrect ? 'correct' : 'wrong');
-
         modelFeedback.textContent = modelCorrect ? '✓' : '✗';
         modelFeedback.className = 'feedback-icon ' + (modelCorrect ? 'correct' : 'wrong');
       }
@@ -481,12 +505,10 @@
       const messageEl = document.getElementById('message');
       const scoreEl = document.getElementById('scoreDisplay');
 
-      // First time Make + Model correct
       if (makeCorrect && modelCorrect && !makeModelLocked) {
         makeModelLocked = true;
         makeSelect.disabled = true;
         modelSelect.disabled = true;
-
         yearTries = 5;
         updateTriesDisplay();
 
@@ -500,7 +522,6 @@
         return;
       }
 
-      // Year guessing phase
       if (makeModelLocked) {
         if (yearExact) {
           finishGame(true, 20);
@@ -516,17 +537,14 @@
             messageEl.textContent = "Year too far off. Try again!";
             messageEl.className = "fail";
           }
-
           scoreEl.textContent = `Score so far: 80 + ${bestYearPoints} = ${80 + bestYearPoints} / 100`;
 
-          if (yearTries === 0) {
-            finishGame(true, bestYearPoints);
-          }
+          if (yearTries === 0) finishGame(true, bestYearPoints);
         }
         return;
       }
 
-      // Wrong Make or Model
+      // Wrong make/model
       mainTries--;
       updateTriesDisplay();
       updateZoom();
@@ -534,9 +552,7 @@
       messageEl.className = "fail";
       scoreEl.textContent = "Score: 0 / 100";
 
-      if (mainTries === 0) {
-        finishGame(false, 0);
-      }
+      if (mainTries === 0) finishGame(false, 0);
     }
 
     function finishGame(success, yearPoints) {
@@ -561,8 +577,14 @@
         messageEl.className = "success";
         scoreEl.textContent = `Score: ${finalScore} / 100`;
 
-        streak++;
-        localStorage.setItem('motowordleStreak', streak);
+        // Only increase streak once per day
+        if (!alreadyPlayedToday) {
+          streak++;
+          localStorage.setItem('motowordleStreak', streak);
+          localStorage.setItem('motowordleLastPlayed', today);
+          localStorage.setItem('motowordleLastScore', finalScore);
+          alreadyPlayedToday = true;
+        }
         document.getElementById('streak').textContent = streak;
       } else {
         finalScore = makeModelLocked ? 80 + bestYearPoints : 0;
@@ -576,13 +598,12 @@
     }
 
     function revealAnswer() {
-      if (solved) return;
+      if (solved || alreadyPlayedToday) return;
       finishGame(false, 0);
       document.getElementById('message').textContent = `Answer: ${dailyBike.year} ${dailyBike.make} ${dailyBike.model}`;
     }
 
     function shareResults() {
-      const today = getLocalDateString();
       const text = `🏍️ MotoWordle ${today}
 Score: ${finalScore}/100
 🔥 Streak: ${streak}`;
@@ -593,13 +614,24 @@ Score: ${finalScore}/100
       }).catch(() => alert(text));
     }
 
-    // ---------- Feedback form ----------
+    // ---------- Simple Math CAPTCHA ----------
+    let captchaAnswer = 0;
+
+    function generateCaptcha() {
+      const a = Math.floor(Math.random() * 10) + 1;
+      const b = Math.floor(Math.random() * 10) + 1;
+      captchaAnswer = a + b;
+      document.getElementById('captchaQuestion').textContent = `${a} + ${b}`;
+      document.getElementById('fbCaptcha').value = '';
+    }
+
     function sendFeedback(e) {
       e.preventDefault();
 
       const email = document.getElementById('fbEmail').value.trim();
       const subject = document.getElementById('fbSubject').value.trim();
       const message = document.getElementById('fbMessage').value.trim();
+      const captchaInput = parseInt(document.getElementById('fbCaptcha').value);
       const status = document.getElementById('fbStatus');
 
       if (!email || !subject || !message) {
@@ -608,23 +640,30 @@ Score: ${finalScore}/100
         return;
       }
 
-      // Construct mailto without ever showing the address on the page
+      if (captchaInput !== captchaAnswer) {
+        status.textContent = "Incorrect security answer. Please try again.";
+        status.style.color = "#f87171";
+        generateCaptcha();
+        return;
+      }
+
       const body = `From: ${email}\n\n${message}`;
       const mailtoLink = `mailto:motowordle@proton.me?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-
       window.location.href = mailtoLink;
 
       status.textContent = "Opening your email client...";
       status.style.color = "#4ade80";
 
-      // Optional: clear form after a short delay
       setTimeout(() => {
         document.getElementById('feedbackForm').reset();
         status.textContent = "";
+        generateCaptcha();
       }, 3000);
     }
 
+    // Init
     updateTriesDisplay();
+    generateCaptcha();
 
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') submitGuess();
