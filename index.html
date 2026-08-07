@@ -42,7 +42,7 @@
       vertical-align: top;
     }
     
-    select, input, button {
+    select, input, button, textarea {
       padding: 10px 12px;
       margin: 5px;
       font-size: 16px;
@@ -117,6 +117,41 @@
       color: #888;
       margin-top: 8px;
     }
+
+    /* Feedback form */
+    #feedbackSection {
+      margin: 60px auto 40px auto;
+      max-width: 500px;
+      text-align: left;
+      background: #1a1a1a;
+      padding: 25px;
+      border-radius: 12px;
+      border: 1px solid #333;
+    }
+    #feedbackSection h3 {
+      text-align: center;
+      margin-top: 0;
+    }
+    #feedbackSection label {
+      display: block;
+      margin: 12px 0 4px 0;
+      font-size: 0.95em;
+    }
+    #feedbackSection input,
+    #feedbackSection textarea {
+      width: 100%;
+      box-sizing: border-box;
+      margin: 0;
+    }
+    #feedbackSection textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+    #feedbackSection button {
+      width: 100%;
+      margin-top: 15px;
+      padding: 12px;
+    }
   </style>
 </head>
 <body>
@@ -175,6 +210,24 @@
   <div id="message"></div>
 
   <button id="giveUpBtn" onclick="revealAnswer()">Give Up</button>
+
+  <!-- Feedback / Request Form -->
+  <div id="feedbackSection">
+    <h3>Feedback or Request</h3>
+    <form id="feedbackForm" onsubmit="sendFeedback(event)">
+      <label for="fbEmail">Your Email *</label>
+      <input type="email" id="fbEmail" required placeholder="you@example.com">
+
+      <label for="fbSubject">Subject *</label>
+      <input type="text" id="fbSubject" required placeholder="Feedback, bike request, bug report...">
+
+      <label for="fbMessage">Message *</label>
+      <textarea id="fbMessage" required placeholder="Write your message here..."></textarea>
+
+      <button type="submit">Send Feedback</button>
+    </form>
+    <p id="fbStatus" style="text-align:center; margin-top:12px; font-size:0.9em;"></p>
+  </div>
 
   <script>
     const bikes = [
@@ -540,10 +593,41 @@ Score: ${finalScore}/100
       }).catch(() => alert(text));
     }
 
+    // ---------- Feedback form ----------
+    function sendFeedback(e) {
+      e.preventDefault();
+
+      const email = document.getElementById('fbEmail').value.trim();
+      const subject = document.getElementById('fbSubject').value.trim();
+      const message = document.getElementById('fbMessage').value.trim();
+      const status = document.getElementById('fbStatus');
+
+      if (!email || !subject || !message) {
+        status.textContent = "Please fill in all fields.";
+        status.style.color = "#f87171";
+        return;
+      }
+
+      // Construct mailto without ever showing the address on the page
+      const body = `From: ${email}\n\n${message}`;
+      const mailtoLink = `mailto:motowordle@proton.me?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+      window.location.href = mailtoLink;
+
+      status.textContent = "Opening your email client...";
+      status.style.color = "#4ade80";
+
+      // Optional: clear form after a short delay
+      setTimeout(() => {
+        document.getElementById('feedbackForm').reset();
+        status.textContent = "";
+      }, 3000);
+    }
+
     updateTriesDisplay();
 
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') submitGuess();
+      if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') submitGuess();
     });
   </script>
 </body>
