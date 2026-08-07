@@ -358,7 +358,6 @@
 
       const messageEl = document.getElementById('message');
       const scoreEl = document.getElementById('scoreDisplay');
-      guessesUsed = 6 - tries;
 
       // First time getting Make + Model correct
       if (makeCorrect && modelCorrect && !makeModelLocked) {
@@ -366,14 +365,16 @@
         makeSelect.disabled = true;
         modelSelect.disabled = true;
 
+        // Reset to 5 dedicated chances for the year
+        tries = 5;
+        document.getElementById('tries').textContent = tries;
+
         if (yearAcceptable) {
           finishGame(true, yearPoints);
         } else {
-          messageEl.textContent = "Make & Model correct! Keep guessing the year (within 20 years).";
+          messageEl.textContent = "Make & Model correct! You now have 5 chances to get the year (within 20 years).";
           messageEl.className = "success";
           scoreEl.textContent = `Score so far: 80 / 100`;
-          tries--;
-          document.getElementById('tries').textContent = tries;
           updateZoom();
         }
         return;
@@ -387,7 +388,7 @@
           tries--;
           document.getElementById('tries').textContent = tries;
           updateZoom();
-          messageEl.textContent = "Year too far off. Try again (must be within 20 years).";
+          messageEl.textContent = "Year too far off. Try again!";
           messageEl.className = "fail";
 
           if (tries === 0) {
@@ -455,13 +456,12 @@
     function shareResults() {
       const today = new Date().toISOString().slice(0, 10);
       const emojiLine = (solved && finalScore >= 80)
-        ? "🟩".repeat(Math.min(guessesUsed, 5)) + "⬜".repeat(Math.max(0, 5 - guessesUsed))
+        ? "🟩".repeat(5) 
         : "🟥".repeat(5);
 
       const text = `🏍️ MotoWordle ${today}
 Score: ${finalScore}/100
 ${emojiLine}
-Tries: ${guessesUsed}/5
 🔥 Streak: ${streak}`;
 
       navigator.clipboard.writeText(text).then(() => {
