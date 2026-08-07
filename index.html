@@ -213,22 +213,51 @@
       { id: 32, year: 2025, make: "Ducati", model: "Multistrada V4", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/Ducati/2025%20Ducati%20Multistrada%20V4.jpg", attribution: "Oq10pass" }
     ];
 
-    function getDailyBike() {
-      const today = new Date().toISOString().slice(0, 10);
-      let hash = 0;
-      for (let i = 0; i < today.length; i++) {
-        hash = (hash * 31 + today.charCodeAt(i)) % bikes.length;
-      }
-      return bikes[Math.abs(hash)];
+    // ---------- Deterministic helpers (based on local date) ----------
+    function getLocalDateString() {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
     }
 
+    function hashString(str) {
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) {
+        hash = ((hash << 5) - hash) + str.charCodeAt(i);
+        hash |= 0; // Convert to 32bit integer
+      }
+      return Math.abs(hash);
+    }
+
+    function getDailyBike() {
+      const today = getLocalDateString();
+      const index = hashString(today) % bikes.length;
+      return bikes[index];
+    }
+
+    // Generate a transform-origin that stays away from the extreme edges
+    function getDailyOrigin() {
+      const today = getLocalDateString();
+      const hash = hashString(today + "_origin");
+
+      // Keep origin between 20% and 80% on both axes (≈ 50px+ margin on most screens)
+      const x = 20 + (hash % 61);          // 20 → 80
+      const y = 20 + ((hash >> 8) % 61);   // 20 → 80
+
+      return `${x}% ${y}%`;
+    }
+
+    // ---------- Game state ----------
     const dailyBike = getDailyBike();
+    const dailyOrigin = getDailyOrigin();
     
     let mainTries = 5;
     let yearTries = 5;
     let solved = false;
     let makeModelLocked = false;
-    let bestYearPoints = 0;          // tracks the best year score achieved
+    let bestYearPoints = 0;
     let finalScore = 0;
     let guessHistory = [];
     let streak = parseInt(localStorage.getItem('motowordleStreak') || '0');
@@ -236,11 +265,9 @@
 
     const zoomLevels = [3.4, 2.5, 1.9, 1.4, 1.0];
     const img = document.getElementById('image');
-    const origins = ["20% 30%", "80% 20%", "50% 20%", "30% 70%", "70% 80%", "25% 50%", "75% 50%", "50% 80%"];
-    const randomOrigin = origins[Math.floor(Math.random() * origins.length)];
     
     img.src = dailyBike.image;
-    img.style.transformOrigin = randomOrigin;
+    img.style.transformOrigin = dailyOrigin;
     img.style.transform = `scale(${zoomLevels[0]})`;
     document.getElementById('attribution').textContent = dailyBike.attribution ? `Photo: ${dailyBike.attribution}` : "";
 
@@ -260,6 +287,7 @@
       }
     }
 
+    // ---------- Dropdowns ----------
     const makes = [...new Set(bikes.map(b => b.make))].sort();
     const makeSelect = document.getElementById('make');
     const modelSelect = document.getElementById('model');
@@ -351,12 +379,10 @@
       const yearPoints = calculateYearPoints(guessYear, dailyBike.year);
       const yearExact = guessYear === dailyBike.year;
 
-      // Update best year points
       if (yearPoints > bestYearPoints) {
         bestYearPoints = yearPoints;
       }
 
-      // Feedback
       if (!makeModelLocked) {
         makeFeedback.textContent = makeCorrect ? '✓' : '✗';
         makeFeedback.className = 'feedback-icon ' + (makeCorrect ? 'correct' : 'wrong');
@@ -368,7 +394,6 @@
       yearFeedback.textContent = yearExact ? '✓' : '✗';
       yearFeedback.className = 'feedback-icon ' + (yearExact ? 'correct' : 'wrong');
 
-      // History
       guessHistory.push({
         make: makeModelLocked ? dailyBike.make : guessMake,
         model: makeModelLocked ? dailyBike.model : guessModel,
@@ -382,7 +407,7 @@
       const messageEl = document.getElementById('message');
       const scoreEl = document.getElementById('scoreDisplay');
 
-      // ===== First time Make + Model correct =====
+      // First time Make + Model correct
       if (makeCorrect && modelCorrect && !makeModelLocked) {
         makeModelLocked = true;
         makeSelect.disabled = true;
@@ -401,10 +426,9 @@
         return;
       }
 
-      // ===== Year guessing phase =====
+      // Year guessing phase
       if (makeModelLocked) {
         if (yearExact) {
-          // Exact year → end immediately with full points
           finishGame(true, 20);
         } else {
           yearTries--;
@@ -412,7 +436,7 @@
           updateZoom();
 
           if (yearPoints > 0) {
-            messageEl.textContent = `Close! (${yearPoints} year points so far). Keep trying for the exact year.`;
+            messageEl.textContent = `Close! (${yearPoints} pts). Keep trying for the exact year.`;
             messageEl.className = "success";
           } else {
             messageEl.textContent = "Year too far off. Try again!";
@@ -422,14 +446,13 @@
           scoreEl.textContent = `Score so far: 80 + ${bestYearPoints} = ${80 + bestYearPoints} / 100`;
 
           if (yearTries === 0) {
-            // Used all 5 year attempts → finish with best score
             finishGame(true, bestYearPoints);
           }
         }
         return;
       }
 
-      // ===== Wrong Make or Model =====
+      // Wrong Make or Model
       mainTries--;
       updateTriesDisplay();
       updateZoom();
@@ -485,7 +508,7 @@
     }
 
     function shareResults() {
-      const today = new Date().toISOString().slice(0, 10);
+      const today = getLocalDateString();
       const text = `🏍️ MotoWordle ${today}
 Score: ${finalScore}/100
 🔥 Streak: ${streak}`;
