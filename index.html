@@ -61,6 +61,14 @@
     button:hover { background: #218c4e; }
     button:disabled { background: #444; cursor: not-allowed; }
     
+    #giveUpBtn {
+      background: #ca8a04;
+      margin-top: 15px;
+    }
+    #giveUpBtn:hover {
+      background: #eab308;
+    }
+    
     .feedback-icon {
       display: block;
       font-size: 22px;
@@ -144,7 +152,6 @@
     
     <br><br>
     <button id="submitBtn" onclick="submitGuess()">Submit Guess</button>
-    <button onclick="revealAnswer()">Give Up</button>
     <button id="shareBtn" onclick="shareResults()">Share Results</button>
   </div>
 
@@ -158,6 +165,9 @@
   <div id="scoreDisplay">Score: 0 / 100</div>
   <div class="info">Tries left: <span id="tries">5</span></div>
   <div id="message"></div>
+
+  <!-- Give Up button moved down and made yellow -->
+  <button id="giveUpBtn" onclick="revealAnswer()">Give Up</button>
 
   <script>
     const bikes = [
@@ -202,7 +212,6 @@
       { id: 32, year: 2025, make: "Ducati", model: "Multistrada V4", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/Ducati/2025%20Ducati%20Multistrada%20V4.jpg", attribution: "Oq10pass" }
     ];
 
-    // Daily bike selection
     function getDailyBike() {
       const today = new Date().toISOString().slice(0, 10);
       let hash = 0;
@@ -215,13 +224,13 @@
     const dailyBike = getDailyBike();
     let tries = 5;
     let solved = false;
+    let makeModelLocked = false;   // new flag
     let finalScore = 0;
     let guessesUsed = 0;
     let guessHistory = [];
     let streak = parseInt(localStorage.getItem('motowordleStreak') || '0');
     document.getElementById('streak').textContent = streak;
 
-    // Zoom system
     const zoomLevels = [3.4, 2.5, 1.9, 1.4, 1.0];
     const img = document.getElementById('image');
     const origins = ["20% 30%", "80% 20%", "50% 20%", "30% 70%", "70% 80%", "25% 50%", "75% 50%", "50% 80%"];
@@ -237,7 +246,6 @@
       img.style.transform = `scale(${zoomLevels[level]})`;
     }
 
-    // Dropdowns
     const makes = [...new Set(bikes.map(b => b.make))].sort();
     const makeSelect = document.getElementById('make');
     const modelSelect = document.getElementById('model');
@@ -253,6 +261,7 @@
     });
 
     makeSelect.addEventListener('change', function() {
+      if (makeModelLocked) return;
       const selectedMake = this.value;
       modelSelect.innerHTML = '<option value="">Select Model</option>';
       makeFeedback.textContent = '';
@@ -315,29 +324,33 @@
       const guessModel = modelSelect.value;
       const guessYear = parseInt(document.getElementById('year').value);
 
-      if (!guessMake || !guessModel) {
+      if (!makeModelLocked && (!guessMake || !guessModel)) {
         document.getElementById('message').textContent = "Please select both Make and Model.";
         document.getElementById('message').className = "fail";
         return;
       }
 
-      const makeCorrect = guessMake === dailyBike.make;
-      const modelCorrect = guessModel === dailyBike.model;
+      const makeCorrect = makeModelLocked ? true : (guessMake === dailyBike.make);
+      const modelCorrect = makeModelLocked ? true : (guessModel === dailyBike.model);
       const yearCorrect = guessYear === dailyBike.year;
       const yearPoints = calculateYearPoints(guessYear, dailyBike.year);
 
-      makeFeedback.textContent = makeCorrect ? '✓' : '✗';
-      makeFeedback.className = 'feedback-icon ' + (makeCorrect ? 'correct' : 'wrong');
+      // Feedback
+      if (!makeModelLocked) {
+        makeFeedback.textContent = makeCorrect ? '✓' : '✗';
+        makeFeedback.className = 'feedback-icon ' + (makeCorrect ? 'correct' : 'wrong');
 
-      modelFeedback.textContent = modelCorrect ? '✓' : '✗';
-      modelFeedback.className = 'feedback-icon ' + (modelCorrect ? 'correct' : 'wrong');
+        modelFeedback.textContent = modelCorrect ? '✓' : '✗';
+        modelFeedback.className = 'feedback-icon ' + (modelCorrect ? 'correct' : 'wrong');
+      }
 
       yearFeedback.textContent = yearCorrect ? '✓' : '✗';
       yearFeedback.className = 'feedback-icon ' + (yearCorrect ? 'correct' : 'wrong');
 
+      // History
       guessHistory.push({
-        make: guessMake,
-        model: guessModel,
+        make: makeModelLocked ? dailyBike.make : guessMake,
+        model: makeModelLocked ? dailyBike.model : guessModel,
         year: guessYear || null,
         makeCorrect,
         modelCorrect,
@@ -349,16 +362,72 @@
       const scoreEl = document.getElementById('scoreDisplay');
       guessesUsed = 6 - tries;
 
-      if (makeCorrect && modelCorrect) {
-        finalScore = 80 + yearPoints;
-        solved = true;
-        document.getElementById('submitBtn').disabled = true;
-        
-        img.style.transformOrigin = "center center";
-        img.style.transform = "scale(1)";
-        
-        document.getElementById('shareBtn').style.display = "inline-block";
+      // Case 1: Make + Model correct (first time)
+      if (makeCorrect && modelCorrect && !makeModelLocked) {
+        makeModelLocked = true;
+        makeSelect.disabled = true;
+        modelSelect.disabled = true;
 
+        if (yearCorrect) {
+          // Fully correct
+          finishGame(true, yearPoints);
+        } else {
+          // Make+Model correct, year wrong → keep going for year
+          messageEl.textContent = "Make & Model correct! Keep guessing the year.";
+          messageEl.className = "success";
+          scoreEl.textContent = `Score so far: 80 / 100`;
+          tries--;
+          document.getElementById('tries').textContent = tries;
+          updateZoom();
+        }
+        return;
+      }
+
+      // Case 2: Already locked (only guessing year now)
+      if (makeModelLocked) {
+        if (yearCorrect) {
+          finishGame(true, yearPoints);
+        } else {
+          tries--;
+          document.getElementById('tries').textContent = tries;
+          updateZoom();
+          messageEl.textContent = "Year incorrect. Try again!";
+          messageEl.className = "fail";
+
+          if (tries === 0) {
+            finishGame(false, 0);
+          }
+        }
+        return;
+      }
+
+      // Case 3: Normal wrong make or model
+      tries--;
+      document.getElementById('tries').textContent = tries;
+      updateZoom();
+      messageEl.textContent = "Incorrect. Zooming out…";
+      messageEl.className = "fail";
+      scoreEl.textContent = "Score: 0 / 100";
+
+      if (tries === 0) {
+        finishGame(false, 0);
+      }
+    }
+
+    function finishGame(success, yearPoints) {
+      solved = true;
+      document.getElementById('submitBtn').disabled = true;
+      document.getElementById('giveUpBtn').disabled = true;
+      
+      img.style.transformOrigin = "center center";
+      img.style.transform = "scale(1)";
+      document.getElementById('shareBtn').style.display = "inline-block";
+
+      const messageEl = document.getElementById('message');
+      const scoreEl = document.getElementById('scoreDisplay');
+
+      if (success) {
+        finalScore = 80 + yearPoints;
         let yearMsg = yearPoints === 20 ? " Perfect year!" :
                       yearPoints > 0   ? ` Year was ${20 - yearPoints} year(s) off.` :
                                          " Year >20 years off (0 pts).";
@@ -371,48 +440,25 @@
         localStorage.setItem('motowordleStreak', streak);
         document.getElementById('streak').textContent = streak;
       } else {
-        tries--;
-        document.getElementById('tries').textContent = tries;
-        updateZoom();
-        
-        messageEl.textContent = "Incorrect. Zooming out…";
+        finalScore = makeModelLocked ? 80 : 0;
+        messageEl.textContent = `Out of tries. It was a ${dailyBike.year} ${dailyBike.make} ${dailyBike.model}.`;
         messageEl.className = "fail";
-        scoreEl.textContent = "Score: 0 / 100";
-
-        if (tries === 0) {
-          img.style.transformOrigin = "center center";
-          img.style.transform = "scale(1)";
-          messageEl.textContent = `Out of tries. It was a ${dailyBike.year} ${dailyBike.make} ${dailyBike.model}.`;
-          document.getElementById('submitBtn').disabled = true;
-          document.getElementById('shareBtn').style.display = "inline-block";
-          streak = 0;
-          localStorage.setItem('motowordleStreak', 0);
-          document.getElementById('streak').textContent = 0;
-          finalScore = 0;
-          guessesUsed = 5;
-        }
+        scoreEl.textContent = `Score: ${finalScore} / 100`;
+        streak = 0;
+        localStorage.setItem('motowordleStreak', 0);
+        document.getElementById('streak').textContent = 0;
       }
     }
 
     function revealAnswer() {
       if (solved) return;
-      img.style.transformOrigin = "center center";
-      img.style.transform = "scale(1)";
+      finishGame(false, 0);
       document.getElementById('message').textContent = `Answer: ${dailyBike.year} ${dailyBike.make} ${dailyBike.model}`;
-      document.getElementById('message').className = "fail";
-      document.getElementById('submitBtn').disabled = true;
-      document.getElementById('tries').textContent = 0;
-      document.getElementById('shareBtn').style.display = "inline-block";
-      streak = 0;
-      localStorage.setItem('motowordleStreak', 0);
-      document.getElementById('streak').textContent = 0;
-      finalScore = 0;
-      guessesUsed = 5;
     }
 
     function shareResults() {
       const today = new Date().toISOString().slice(0, 10);
-      const emojiLine = solved 
+      const emojiLine = solved && finalScore >= 80
         ? "🟩".repeat(guessesUsed) + "⬜".repeat(5 - guessesUsed)
         : "🟥".repeat(5);
 
