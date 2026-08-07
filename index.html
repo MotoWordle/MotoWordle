@@ -146,7 +146,13 @@
     </div>
 
     <div class="field-group">
-      <input id="year" type="number" placeholder="Year" min="1900" max="2030">
+      <input id="year" 
+             type="text" 
+             inputmode="numeric" 
+             pattern="[0-9]*" 
+             maxlength="4" 
+             placeholder="Year"
+             oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 4)">
       <span id="yearFeedback" class="feedback-icon"></span>
     </div>
     
@@ -213,7 +219,7 @@
       { id: 32, year: 2025, make: "Ducati", model: "Multistrada V4", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/Ducati/2025%20Ducati%20Multistrada%20V4.jpg", attribution: "Oq10pass" }
     ];
 
-    // ---------- Deterministic helpers (based on local date) ----------
+    // ---------- Deterministic daily selection ----------
     function getLocalDateString() {
       const now = new Date();
       const year = now.getFullYear();
@@ -222,29 +228,44 @@
       return `${year}-${month}-${day}`;
     }
 
-    function hashString(str) {
-      let hash = 0;
-      for (let i = 0; i < str.length; i++) {
-        hash = ((hash << 5) - hash) + str.charCodeAt(i);
-        hash |= 0; // Convert to 32bit integer
-      }
-      return Math.abs(hash);
+    function getDayNumber() {
+      const start = new Date(2025, 0, 1);
+      const today = new Date();
+      start.setHours(0, 0, 0, 0);
+      today.setHours(0, 0, 0, 0);
+      return Math.floor((today - start) / (1000 * 60 * 60 * 24));
+    }
+
+    function seededRandom(seed) {
+      let s = seed;
+      return function() {
+        s = (s * 1103515245 + 12345) & 0x7fffffff;
+        return s / 0x7fffffff;
+      };
     }
 
     function getDailyBike() {
-      const today = getLocalDateString();
-      const index = hashString(today) % bikes.length;
-      return bikes[index];
+      const dayNumber = getDayNumber();
+      const cycle = Math.floor(dayNumber / bikes.length);
+      const position = dayNumber % bikes.length;
+
+      const indices = [...Array(bikes.length).keys()];
+      const rand = seededRandom(cycle + 987654);
+
+      for (let i = indices.length - 1; i > 0; i--) {
+        const j = Math.floor(rand() * (i + 1));
+        [indices[i], indices[j]] = [indices[j], indices[i]];
+      }
+
+      return bikes[indices[position]];
     }
 
-    // Generate a transform-origin that stays away from the extreme edges
     function getDailyOrigin() {
-      const today = getLocalDateString();
-      const hash = hashString(today + "_origin");
+      const dayNumber = getDayNumber();
+      const rand = seededRandom(dayNumber + 55555);
 
-      // Keep origin between 20% and 80% on both axes (≈ 50px+ margin on most screens)
-      const x = 20 + (hash % 61);          // 20 → 80
-      const y = 20 + ((hash >> 8) % 61);   // 20 → 80
+      const x = 22 + Math.floor(rand() * 57);
+      const y = 22 + Math.floor(rand() * 57);
 
       return `${x}% ${y}%`;
     }
