@@ -25,6 +25,9 @@
       border: 4px solid #333;
       border-radius: 12px;
       background: #111;
+      position: relative;
+      user-select: none;
+      -webkit-user-select: none;
     }
 
     #image {
@@ -32,6 +35,9 @@
       height: 100%;
       object-fit: cover;
       transition: transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+      -webkit-user-drag: none;
+      user-select: none;
+      pointer-events: auto;
     }
 
     .controls { margin: 15px 0 5px 0; }
@@ -117,6 +123,7 @@
       color: #888;
       margin-top: 8px;
     }
+
     /* Feedback form */
     #feedbackSection {
       margin: 60px auto 40px auto;
@@ -158,6 +165,82 @@
       border-radius: 6px;
       border: 1px solid #444;
     }
+
+    /* How to Play modal */
+    #howToModal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+    #howToModal.visible {
+      display: flex;
+    }
+    .modal-content {
+      background: #1a1a1a;
+      border: 1px solid #444;
+      border-radius: 14px;
+      max-width: 440px;
+      width: 100%;
+      padding: 28px 24px 22px;
+      text-align: left;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+      position: relative;
+    }
+    .modal-content h2 {
+      margin: 0 0 16px 0;
+      text-align: center;
+      font-size: 1.4em;
+    }
+    .modal-content ol {
+      margin: 0 0 18px 0;
+      padding-left: 22px;
+    }
+    .modal-content li {
+      margin-bottom: 10px;
+      line-height: 1.45;
+    }
+    .modal-content p {
+      margin: 0 0 18px 0;
+      color: #bbb;
+      font-size: 0.95em;
+      text-align: center;
+    }
+    .modal-close {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      background: #1a6b3a;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .modal-close:hover {
+      background: #218c4e;
+    }
+    .modal-x {
+      position: absolute;
+      top: 12px;
+      right: 14px;
+      background: transparent;
+      border: none;
+      color: #888;
+      font-size: 22px;
+      cursor: pointer;
+      line-height: 1;
+      padding: 4px 8px;
+    }
+    .modal-x:hover {
+      color: #eee;
+    }
   </style>
 </head>
 <body>
@@ -167,7 +250,7 @@
   <div class="info">🔥 Streak: <span id="streak">0</span></div>
 
   <div id="image-container">
-    <img id="image" src="" alt="Motorcycle">
+    <img id="image" src="" alt="Motorcycle" draggable="false">
   </div>
   <div id="attribution"></div>
 
@@ -212,6 +295,7 @@
   </div>
   <div id="message"></div>
   <button id="giveUpBtn" onclick="revealAnswer()">Give Up</button>
+
   <!-- Feedback Form -->
   <div id="feedbackSection">
     <h3>Feedback or Request</h3>
@@ -230,6 +314,24 @@
     </form>
     <p id="fbStatus" style="text-align:center; margin-top:12px; font-size:0.9em;"></p>
   </div>
+
+  <!-- How to Play Modal -->
+  <div id="howToModal" role="dialog" aria-labelledby="howToTitle" aria-modal="true">
+    <div class="modal-content">
+      <button class="modal-x" onclick="dismissHowTo()" aria-label="Close">&times;</button>
+      <h2 id="howToTitle">How to Play</h2>
+      <ol>
+        <li>A motorcycle photo starts heavily zoomed in. Guess the <strong>Make</strong> and <strong>Model</strong>.</li>
+        <li>Each wrong guess zooms the image out a little more (5 tries).</li>
+        <li>Once Make &amp; Model are correct you get <strong>80 points</strong> and 5 extra tries for the exact <strong>Year</strong>.</li>
+        <li>Year points: exact = 20 pts. Each year off costs 1 point (0 if more than 20 years away).</li>
+        <li>One puzzle per day. Come back tomorrow for a new bike!</li>
+      </ol>
+      <p>Good luck and have fun 🏍️</p>
+      <button class="modal-close" onclick="dismissHowTo()">Got it!</button>
+    </div>
+  </div>
+
   <script>
     const bikes = [
       // BMW
@@ -336,6 +438,7 @@
       { id: 88, year: 2021, make: "MV Agusta", model: "Superveloce", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/MV%20Agusta/2021%20MV%20Agusta%20Superveloce.jpg", attribution: "Matthb1395" },
       { id: 89, year: 2015, make: "MV Agusta", model: "Turismo Veloce", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/MV%20Agusta/2015%20MV%20Agusta%20Turismo%20Veloce.jpg", attribution: "Andrew Napier" }
     ];
+
     // ---------- Deterministic daily selection ----------
     function getLocalDateString() {
       const now = new Date();
@@ -358,9 +461,6 @@
         return s / 0x7fffffff;
       };
     }
-    // Builds one full pass through every bike (a "cycle"), ordered so that
-    // no two consecutive days feature the same manufacturer. Deterministic
-    // per cycle so every player sees the same sequence on the same day.
     function buildDailySequence(cycle) {
       const rand = seededRandom(cycle + 987654);
       const groups = {};
@@ -369,7 +469,6 @@
         groups[b.make].push(i);
       });
       let makes = Object.keys(groups);
-      // Shuffle each make's bikes, and shuffle make order (for tie-break variety)
       makes.forEach(m => {
         const arr = groups[m];
         for (let i = arr.length - 1; i > 0; i--) {
@@ -381,9 +480,6 @@
         const j = Math.floor(rand() * (i + 1));
         [makes[i], makes[j]] = [makes[j], makes[i]];
       }
-      // Greedily interleave: each day, pick the make with the most bikes
-      // left that isn't the previous day's make. Guaranteed to succeed as
-      // long as no single make is more than half the total roster.
       const counts = {};
       makes.forEach(m => counts[m] = groups[m].length);
       const sequence = [];
@@ -419,6 +515,7 @@
       const y = 22 + Math.floor(rand() * 57);
       return `${x}% ${y}%`;
     }
+
     // ---------- Game state ----------
     const today = getLocalDateString();
     const dailyBike = getDailyBike();
@@ -435,13 +532,64 @@
     let lastPlayed = localStorage.getItem('motowordleLastPlayed') || '';
     let alreadyPlayedToday = lastPlayed === today;
     document.getElementById('streak').textContent = streak;
+
     const zoomLevels = [3.4, 2.5, 1.9, 1.4, 1.0];
     const img = document.getElementById('image');
+    const imageContainer = document.getElementById('image-container');
 
     img.src = dailyBike.image;
     img.style.transformOrigin = dailyOrigin;
     img.style.transform = `scale(${zoomLevels[0]})`;
     document.getElementById('attribution').textContent = dailyBike.attribution ? `Photo: ${dailyBike.attribution}` : "";
+
+    // ---------- Prevent early full-image access ----------
+    function isFullyZoomedOut() {
+      return solved || alreadyPlayedToday ||
+             (makeModelLocked ? yearTries <= 0 : mainTries <= 0) ||
+             (img.style.transform === 'scale(1)' || img.style.transform === 'scale(1.0)');
+    }
+
+    function blockImageAccess(e) {
+      if (!isFullyZoomedOut()) {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+      }
+    }
+
+    // Block right-click / context menu while zoomed
+    imageContainer.addEventListener('contextmenu', blockImageAccess);
+    img.addEventListener('contextmenu', blockImageAccess);
+
+    // Block drag
+    img.addEventListener('dragstart', blockImageAccess);
+
+    // Extra safety for middle-click / auxclick
+    img.addEventListener('auxclick', (e) => {
+      if (e.button === 1 && !isFullyZoomedOut()) { // middle mouse
+        e.preventDefault();
+      }
+    });
+
+    // ---------- How to Play modal ----------
+    function showHowTo() {
+      document.getElementById('howToModal').classList.add('visible');
+    }
+    function dismissHowTo() {
+      document.getElementById('howToModal').classList.remove('visible');
+      localStorage.setItem('motowordleSeenHowTo', '1');
+    }
+    // Close on backdrop click
+    document.getElementById('howToModal').addEventListener('click', function(e) {
+      if (e.target === this) dismissHowTo();
+    });
+    // Close on Escape
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && document.getElementById('howToModal').classList.contains('visible')) {
+        dismissHowTo();
+      }
+    });
+
     // Lock game if already completed today
     if (alreadyPlayedToday) {
       solved = true;
@@ -454,6 +602,7 @@
       document.getElementById('message').className = "success";
       document.getElementById('scoreDisplay').textContent = `Score: ${localStorage.getItem('motowordleLastScore') || 0} / 100`;
     }
+
     function updateZoom() {
       const currentTries = makeModelLocked ? yearTries : mainTries;
       const level = Math.min(5 - currentTries, zoomLevels.length - 1);
@@ -468,7 +617,8 @@
         document.getElementById('tries').textContent = mainTries;
       }
     }
-    // ---------- Progress persistence (survives page reloads within the same day) ----------
+
+    // ---------- Progress persistence ----------
     function saveProgress() {
       localStorage.setItem('motowordleProgress', JSON.stringify({
         date: today,
@@ -537,6 +687,7 @@
       updateTriesDisplay();
       updateZoom();
     }
+
     // ---------- Dropdowns ----------
     const makes = [...new Set(bikes.map(b => b.make))].sort();
     const makeSelect = document.getElementById('make');
@@ -570,6 +721,7 @@
       });
       modelSelect.disabled = false;
     });
+
     function updateHistoryDisplay() {
       const list = document.getElementById('historyList');
       if (guessHistory.length === 0) {
@@ -600,6 +752,7 @@
       if (diff > 20) return 0;
       return Math.max(0, 20 - diff);
     }
+
     function submitGuess() {
       if (solved || alreadyPlayedToday) return;
       if (!makeModelLocked && mainTries <= 0) return;
@@ -688,6 +841,7 @@
         saveProgress();
       }
     }
+
     function finishGame(success, yearPoints) {
       solved = true;
       document.getElementById('submitBtn').disabled = true;
@@ -701,12 +855,11 @@
       if (success) {
         finalScore = 80 + yearPoints;
         let yearMsg = yearPoints === 20 ? " Perfect year!" :
-                      yearPoints > 0   ? ` Best year score: ${yearPoints} points.` :
+                      yearPoints > 0 ? ` Best year score: ${yearPoints} points.` :
                                          " No year points.";
         messageEl.textContent = `Correct! ${dailyBike.year} ${dailyBike.make} ${dailyBike.model}.${yearMsg}`;
         messageEl.className = "success";
         scoreEl.textContent = `Score: ${finalScore} / 100`;
-        // Only increase streak once per day
         if (!alreadyPlayedToday) {
           streak++;
           localStorage.setItem('motowordleStreak', streak);
@@ -721,26 +874,45 @@
         localStorage.setItem('motowordleStreak', 0);
         document.getElementById('streak').textContent = 0;
       }
-      // Completing the round today locks out replay, whether it was a win or a loss.
       localStorage.setItem('motowordleLastPlayed', today);
       localStorage.setItem('motowordleLastScore', finalScore);
       alreadyPlayedToday = true;
       clearProgress();
     }
+
     function revealAnswer() {
       if (solved || alreadyPlayedToday) return;
       finishGame(false, 0);
       document.getElementById('message').textContent = `Answer: ${dailyBike.year} ${dailyBike.make} ${dailyBike.model}`;
     }
+
     function shareResults() {
+      // Build a compact emoji summary from guess history
+      let emojiLine = '';
+      if (guessHistory.length > 0) {
+        emojiLine = guessHistory.map(g => {
+          const m = g.makeCorrect ? '🟩' : '🟥';
+          const mo = g.modelCorrect ? '🟩' : '🟥';
+          const y = g.yearExact ? '🟩' : '🟥';
+          return m + mo + y;
+        }).join('\n');
+      } else {
+        emojiLine = '—';
+      }
+
       const text = `🏍️ MotoWordle ${today}
 Score: ${finalScore}/100
-🔥 Streak: ${streak}`;
+🔥 Streak: ${streak}
+
+${emojiLine}
+
+Play at motowordle.com`;
       navigator.clipboard.writeText(text).then(() => {
         document.getElementById('message').textContent = "Results copied to clipboard!";
         document.getElementById('message').className = "success";
       }).catch(() => alert(text));
     }
+
     // ---------- Simple Math CAPTCHA ----------
     let captchaAnswer = 0;
     function generateCaptcha() {
@@ -779,12 +951,20 @@ Score: ${finalScore}/100
         generateCaptcha();
       }, 3000);
     }
+
     // Init
     if (!alreadyPlayedToday) {
       restoreProgress();
     }
     updateTriesDisplay();
     generateCaptcha();
+
+    // Show How to Play on first visit only
+    if (!localStorage.getItem('motowordleSeenHowTo')) {
+      // Small delay so the page renders first
+      setTimeout(showHowTo, 400);
+    }
+
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA' && !e.target.closest('#feedbackSection')) {
         submitGuess();
