@@ -19,7 +19,7 @@
     #image-container {
       width: 100%;
       max-width: 800px;
-      height: 420px;
+      aspect-ratio: 40 / 21;
       margin: 20px auto;
       overflow: hidden;
       border: 4px solid #333;
@@ -166,8 +166,8 @@
       border: 1px solid #444;
     }
 
-    /* How to Play modal */
-    #howToModal {
+    /* How to Play / confirmation modals */
+    #howToModal, #giveUpModal {
       display: none;
       position: fixed;
       inset: 0;
@@ -178,7 +178,7 @@
       padding: 20px;
       box-sizing: border-box;
     }
-    #howToModal.visible {
+    #howToModal.visible, #giveUpModal.visible {
       display: flex;
     }
     .modal-content {
@@ -225,6 +225,27 @@
     }
     .modal-close:hover {
       background: #218c4e;
+    }
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 4px;
+    }
+    .modal-actions button {
+      flex: 1;
+      margin-top: 0;
+    }
+    .modal-btn-no {
+      background: #333;
+    }
+    .modal-btn-no:hover {
+      background: #444;
+    }
+    .modal-btn-yes {
+      background: #ca8a04;
+    }
+    .modal-btn-yes:hover {
+      background: #eab308;
     }
     .modal-x {
       position: absolute;
@@ -294,7 +315,7 @@
     <span id="triesLabel">Tries left:</span> <span id="tries">5</span>
   </div>
   <div id="message"></div>
-  <button id="giveUpBtn" onclick="revealAnswer()">Give Up</button>
+  <button id="giveUpBtn" onclick="showGiveUpConfirm()">Give Up</button>
 
   <!-- Feedback Form -->
   <div id="feedbackSection">
@@ -332,6 +353,18 @@
     </div>
   </div>
 
+  <!-- Give Up Confirmation Modal -->
+  <div id="giveUpModal" role="dialog" aria-labelledby="giveUpTitle" aria-modal="true">
+    <div class="modal-content">
+      <h2 id="giveUpTitle">Give Up?</h2>
+      <p>Are you sure? This will reveal today's answer and end your streak.</p>
+      <div class="modal-actions">
+        <button class="modal-close modal-btn-no" onclick="cancelGiveUp()">No</button>
+        <button class="modal-close modal-btn-yes" onclick="confirmGiveUp()">Yes</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     const bikes = [
       // BMW
@@ -342,6 +375,13 @@
       { id: 5, year: 1975, make: "BMW", model: "R75/6", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/BMW/1975%20BMW%20R75_6.JPG", attribution: "" },
       { id: 6, year: 2021, make: "BMW", model: "F850GS", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/BMW/2021%20BMW%20F850GS.jpg", attribution: "" },
       { id: 7, year: 2022, make: "BMW", model: "R nineT", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/BMW/2022%20BMW%20R%20NineT.jpg", attribution: "" },
+      { id: 90, year: 1959, make: "BMW", model: "R50", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/BMW/1959%20BMW%20R50.jpg", attribution: "Craig Howell" },
+      { id: 91, year: 1934, make: "BMW", model: "R7", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/BMW/1934%20BMW%20R7.jpg", attribution: "ElfeJoyeux" },
+      { id: 92, year: 2023, make: "BMW", model: "S1000XR", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/BMW/2023%20BMW%20S1000XR.JPG", attribution: "Lothar Spurzem" },
+      { id: 93, year: 1977, make: "BMW", model: "R100RS", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/BMW/1977%20BMW%20R100RS.jpg", attribution: "JanH015" },
+      { id: 94, year: 1996, make: "BMW", model: "R1100RT", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/BMW/1996%20BMW%20R110RT.jpg", attribution: "Ярослав2017" },
+      { id: 95, year: 2023, make: "BMW", model: "G310GS", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/BMW/2023%20BMW%20G310GS.jpg", attribution: "Wikisympathisant" },
+      { id: 96, year: 1997, make: "BMW", model: "F650ST", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/BMW/1997%20BMW%20F650ST.jpg", attribution: "Frank G. Leuderalbert" },
       // Harley-Davidson
       { id: 8, year: 1926, make: "Harley-Davidson", model: "Model B", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/Harley-Davidson/1926%20Harley-Davidson%20Model%20B.jpg", attribution: "" },
       { id: 9, year: 1944, make: "Harley-Davidson", model: "Model U", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/Harley-Davidson/1944%20Harley-Davidson%20Model%20U.jpg", attribution: "" },
@@ -360,6 +400,12 @@
       { id: 21, year: 1978, make: "Honda", model: "CBX1000", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/Honda/1978%20Honda%20CBX1000.jpeg", attribution: "Rene Kientopp" },
       { id: 22, year: 2006, make: "Honda", model: "CBR1000RR", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/Honda/2006%20Honda%20CBR1000RR%20Fireblade.jpg", attribution: "Sierra Odonohue" },
       { id: 23, year: 2025, make: "Honda", model: "Africa Twin", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/Honda/2025%20Honda%20Africa%20Twin.jpg", attribution: "AVMOTO" },
+      { id: 97, year: 2002, make: "Honda", model: "919/CB900F", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/Honda/2002%20Honda%20919.jpg", attribution: "Aconcagua" },
+      { id: 98, year: 1998, make: "Honda", model: "VFR800", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/Honda/1998%20Honda%20VFR%20800.jpg", attribution: "Lmascre" },
+      { id: 99, year: 1997, make: "Honda", model: "CBR1100XX Super Blackbird", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/Honda/1997%20Honda%20CBR1100XX%20Super%20Blackbird.jpg", attribution: "Leonhartsberger" },
+      { id: 100, year: 1963, make: "Honda", model: "CA77 305 Dream", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/Honda/1963%20Honda%20CA77%20305%20Dream.jpg", attribution: "Callmeace" },
+      { id: 101, year: 1993, make: "Honda", model: "CB1000 Super Four", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/Honda/1993%20Honda%20CB1000%20Super%20Four.JPG", attribution: "H-S sc30" },
+      { id: 102, year: 1987, make: "Honda", model: "CBR1000F", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/Honda/1987%20Honda%20CBR1000F.jpg", attribution: "Ritzel" },
       // Ducati
       { id: 24, year: 1973, make: "Ducati", model: "750 Sport", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/Ducati/1973%20Ducati%20750%20Sport.jpg", attribution: "Craig Howell" },
       { id: 25, year: 1990, make: "Ducati", model: "851", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/Ducati/1990%20Ducati%20851.jpg", attribution: "Calreyn88" },
@@ -436,7 +482,12 @@
       { id: 86, year: 2006, make: "MV Agusta", model: "Brutale 910", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/MV%20Agusta/2006%20MV%20Agusta%20Brutale%20910.JPG", attribution: "Piero" },
       { id: 87, year: 2023, make: "MV Agusta", model: "Dragster 800RR", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/MV%20Agusta/2023%20MV%20Agusta%20Dragster%20800RR.jpg", attribution: "M1KSF7" },
       { id: 88, year: 2021, make: "MV Agusta", model: "Superveloce", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/MV%20Agusta/2021%20MV%20Agusta%20Superveloce.jpg", attribution: "Matthb1395" },
-      { id: 89, year: 2015, make: "MV Agusta", model: "Turismo Veloce", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/MV%20Agusta/2015%20MV%20Agusta%20Turismo%20Veloce.jpg", attribution: "Andrew Napier" }
+      { id: 89, year: 2015, make: "MV Agusta", model: "Turismo Veloce", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/MV%20Agusta/2015%20MV%20Agusta%20Turismo%20Veloce.jpg", attribution: "Andrew Napier" },
+      // BSA
+      { id: 103, year: 1970, make: "BSA", model: "Lightning 650", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/BSA/1970%20BSA%20Lightning%20650.jpg", attribution: "Stavros1" },
+      { id: 104, year: 1959, make: "BSA", model: "Gold Star", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/BSA/1959%20BSA%20Gold%20Star.jpg", attribution: "SG2012" },
+      { id: 105, year: 1951, make: "BSA", model: "Bantam", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/BSA/1951%20BSA%20Bantam.JPG", attribution: "Ch vik" },
+      { id: 106, year: 1963, make: "BSA", model: "A65", image: "https://pub-4f8de16696b54a248d93364b032cdf5f.r2.dev/BSA/1963%20BSA%20A65.jpg", attribution: "Ken" }
     ];
 
     // ---------- Deterministic daily selection ----------
@@ -583,10 +634,32 @@
     document.getElementById('howToModal').addEventListener('click', function(e) {
       if (e.target === this) dismissHowTo();
     });
-    // Close on Escape
+
+    // ---------- Give Up confirmation modal ----------
+    function showGiveUpConfirm() {
+      if (solved || alreadyPlayedToday) return;
+      document.getElementById('giveUpModal').classList.add('visible');
+    }
+    function cancelGiveUp() {
+      document.getElementById('giveUpModal').classList.remove('visible');
+    }
+    function confirmGiveUp() {
+      document.getElementById('giveUpModal').classList.remove('visible');
+      revealAnswer();
+    }
+    // Close on backdrop click
+    document.getElementById('giveUpModal').addEventListener('click', function(e) {
+      if (e.target === this) cancelGiveUp();
+    });
+
+    // Close either modal on Escape
     document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape' && document.getElementById('howToModal').classList.contains('visible')) {
+      if (e.key !== 'Escape') return;
+      if (document.getElementById('howToModal').classList.contains('visible')) {
         dismissHowTo();
+      }
+      if (document.getElementById('giveUpModal').classList.contains('visible')) {
+        cancelGiveUp();
       }
     });
 
@@ -966,7 +1039,9 @@ Play at motowordle.com`;
     }
 
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA' && !e.target.closest('#feedbackSection')) {
+      if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA' && !e.target.closest('#feedbackSection') &&
+          !document.getElementById('howToModal').classList.contains('visible') &&
+          !document.getElementById('giveUpModal').classList.contains('visible')) {
         submitGuess();
       }
     });
